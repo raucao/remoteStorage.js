@@ -15,7 +15,7 @@ define(
       }
 
       platformObj.headers = {
-        'Authorization': 'Bearer ' + token,
+        'Authorization': 'Bearer ' + decodeURIComponent(token),
         'Content-Type':  'text/plain;charset=UTF-8'
       };
 
