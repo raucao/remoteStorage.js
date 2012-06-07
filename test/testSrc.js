@@ -1,4 +1,5 @@
 require(['../src/remoteStorage'], function(remoteStorage) {
+  remoteStorage.displayWidget('a', ['bloob:rw']);
   var tests = {
     'admin@mich.oc': {
       type: 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#webdav',
