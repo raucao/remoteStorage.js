@@ -22,7 +22,7 @@ function Stat() {
 function windowLoadHandler() {
     require(['../../src/remoteStorage'], function(remoteStorage) {
       remoteStorage.displayWidget('remotestorage-connect', ['tasks/todolist']);
-      remoteStorageClient = remoteStorage.getClient('tasks/todolist');
+      remoteStorageClient = remoteStorage.createClient('tasks/todolist');
       remoteStorageClient.sync(function(e) {
         loadTodos();
         refreshData();

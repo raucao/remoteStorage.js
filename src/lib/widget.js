@@ -10,6 +10,34 @@ define(
         }
         return null;
       },
+      createOAuthAddress = function (storageInfo, scopes, redirectUri) {
+        if(storageInfo.type=='https://www.w3.org/community/rww/wiki/read-write-web-00#simple') {
+          scopesStr = scopes.join(' ');
+        } else {
+          var legacyScopes = [];
+          for(var i=0; i<scopes.length; i++) {
+            legacyScopes.push(scopes[i].split(':')[0].split('/')[0]);
+          }
+          scopesStr = legacyScopes.join(',');          
+        }
+        var hostAndRest;
+        if(redirectUri.substring(0, 'https://'.length) == 'https://') {
+          hostAndRest = redirectUri.substring('https://'.length);
+        } else if(redirectUri.substring(0, 'http://'.length) == 'http://') {
+          hostAndRest = redirectUri.substring('http://'.length);
+        } else {
+          throw new Error('redirectUri does not start with https:// or http://');
+        }
+        var host = hostAndRest.split(':')[0].split('/')[0];
+        var terms = [
+          'redirect_uri='+encodeURIComponent(redirectUri),
+          'scope='+encodeURIComponent(scopesStr),
+          'response_type=token',
+          'client_id='+encodeURIComponent(host)
+        ];
+        var authHref = storageInfo.properties['auth-endpoint'];
+        return authHref + (authHref.indexOf('?') === -1?'?':'&') + terms.join('&');
+      },
       display = function(connectElement, scopesToRequest) {
         document.getElementById(connectElement).innerHTML =
           '<style>'
@@ -61,7 +89,8 @@ define(
       };
 
   return {
-    receiveToken : receiveToken,
-    display      : display
+    receiveToken       : receiveToken,
+    createOAuthAddress : createOAuthAddress,
+    display            : display
   };
 });
