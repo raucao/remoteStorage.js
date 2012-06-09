@@ -4,16 +4,18 @@ define(
 
     var modules = {
       },
-      scopes = {},
       defineModule = function(moduleName, version, module) {
         modules[moduleName+'-'+version] = module;
       },
       loadModule = function(moduleName, version, mode) {
-        scopes[moduleName] = (mode?mode:'rw');
         if(version=='0.0' || typeof(version) == 'undefined') {
           this[moduleName] = syncClient.create(moduleName);
         } else {
           this[moduleName] = modules[moduleName+'-'+version](syncClient.create(moduleName));
+        }
+        widget.addScope(moduleName+':'+(mode?mode:'rw'));
+        if(mode != 'r') {
+          widget.addScope('public/'+moduleName+':'+(mode?mode:'rw'));
         }
       };
   return {
