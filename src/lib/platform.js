@@ -123,8 +123,10 @@ define([], function() {
     };
     for(var i=0; i<nodes.length; i++) {
       var link={};
-      for(var j=0; j<nodes[i].attributes.length;j++) {
-        link[nodes[i].attributes[j].name]=nodes[i].attributes[j].value;
+      if(nodes[i].attributes) {
+        for(var j=0; j<nodes[i].attributes.length;j++) {
+          link[nodes[i].attributes[j].name]=nodes[i].attributes[j].value;
+        }
       }
       if(link['rel']) {
         obj.Link.push({
