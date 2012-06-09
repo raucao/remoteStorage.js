@@ -51,6 +51,8 @@ define(
             }
           },
           sync: function (path) {
+          },
+          on: function(eventName, handler) {
           }
         };
       };
