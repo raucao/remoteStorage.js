@@ -44,17 +44,56 @@ define(
       translate = function(text) {
         return text;
       },
+      setStorageInfo = function(storageInfo) {
+        localStorage.storageInfo=JSON.stringify(storageInfo);
+      },
+      setBearerToken = function(bearerToken) {
+        localStorage.bearerToken=bearerToken;
+      },
       connect = function(userAddress, cb) {
         getStorageInfo(userAddress, function(err, storageInfo) {
           if(err) {
             alert(err);
             cb();
           } else {
+            localStorage.userAddress = userAddress;
+            setStorageInfo(storageInfo);
             location = createOAuthAddress(storageInfo, scopesToRequest, location.href);
           }
         });
       },
       populate = function() {
+        var bearerToken;
+        if(location.hash.length) {
+          var parts = location.hash.substring(1).split('&');
+          var partsToKeep = [];
+          for(var i=0; i < parts.length; i++) {
+            var kv = parts[i].split('=');
+            if(kv[0]=='access_token') {
+              bearerToken = decodeURIComponent(kv[1]);
+              setBearerToken(bearerToken);
+            } else if(kv[0] != 'token_type') {
+              partsToKeep.push(parts[i]);
+            }
+          }
+          location.hash = partsToKeep.length ? '#'+partsToKeep.join('&') : '';
+        }
+        if(!bearerToken) {
+          bearerToken = localStorage.bearerToken;
+        }
+        if(bearerToken) {
+          displayConnected(localStorage.userAddress);
+        } else {
+          displayDisconnected();
+        }
+      },
+      displayConnected = function(userAddress) {
+        document.getElementById('remotestorage-status').value=translate('connected');
+        document.getElementById('remotestorage-get').style.display = 'none';
+        document.getElementById('remotestorage-useraddress').style.display = 'inline';
+        document.getElementById('remotestorage-useraddress').value = userAddress;
+      },
+      displayDisconnected = function() {
         //this gets called when the page loads, and may be called at random moments too. the widgets is at first in 'loading...' state, so that needs to be overwritten
         //if nothing is found, it should be logged out state ('connect')
         document.getElementById('remotestorage-status').value=translate('connect');
@@ -69,8 +108,8 @@ define(
             });
           };
         };
-      },
-      receiveToken = function () {
+      };
+    var receiveToken = function () {
         var params = platform.getFragmentParams();
         for(var i = 0; i < params.length; i++) {
           if(params[i].substring(0, 'access_token='.length)=='access_token=') {
