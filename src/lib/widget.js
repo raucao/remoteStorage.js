@@ -33,6 +33,8 @@ define(
                 }
                 cb(err2, storageInfo);
               });
+            } if(err) {
+              cb(err);
             } else {
               cb(err, createStorageInfo(data.href, data.type, data.properties));
             }
@@ -42,10 +44,11 @@ define(
       translate = function(text) {
         return text;
       },
-      connect = function(userAddress) {
+      connect = function(userAddress, cb) {
         getStorageInfo(userAddress, function(err, storageInfo) {
           if(err) {
             alert(err);
+            cb();
           } else {
             location = createOAuthAddress(storageInfo, scopesToRequest, location.href);
           }
@@ -60,7 +63,10 @@ define(
           document.getElementById('remotestorage-get').style.display = 'none';
           document.getElementById('remotestorage-useraddress').style.display = 'inline';
           document.getElementById('remotestorage-status').onclick = function() {
-            connect(document.getElementById('remotestorage-useraddress').value);
+            document.getElementById('remotestorage-status').value=translate('connecting');
+            connect(document.getElementById('remotestorage-useraddress').value, function() {
+              document.getElementById('remotestorage-status').value=translate('connect');
+            });
           };
         };
       },
