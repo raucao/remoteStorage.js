@@ -87,16 +87,35 @@ define(
           displayDisconnected();
         }
       },
+      //    the widget represents the session, which stands above the modules
+      //    session states:
+      //
+      //    - start []
+      //      - registering []
+      //      - typing user address []
+      //      - connection interrupted [userAddress, storageInfo] -> []
+      //
+      //    - connecting [userAddress]
+      //    - connect failed [userAddress] -> []
+      //    - connected, busy [userAddress, storageInfo, bearerToken]
+      //      - connected, ready [userAddress, storageInfo, bearerToken]
       displayConnected = function(userAddress) {
         document.getElementById('remotestorage-status').value=translate('connected');
         document.getElementById('remotestorage-get').style.display = 'none';
         document.getElementById('remotestorage-useraddress').style.display = 'inline';
         document.getElementById('remotestorage-useraddress').value = userAddress;
+        document.getElementById('remotestorage-status').disabled = false;
+        document.getElementById('remotestorage-status').onclick = disconnect;
+      },
+      disconnect = function() {
+        localStorage.clear();
+        displayDisconnected();
       },
       displayDisconnected = function() {
         //this gets called when the page loads, and may be called at random moments too. the widgets is at first in 'loading...' state, so that needs to be overwritten
         //if nothing is found, it should be logged out state ('connect')
         document.getElementById('remotestorage-status').value=translate('connect');
+        document.getElementById('remotestorage-useraddress').value='';
         document.getElementById('remotestorage-status').disabled = false;
         document.getElementById('remotestorage-status').onclick = function() {
           document.getElementById('remotestorage-get').style.display = 'none';
