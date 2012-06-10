@@ -10,6 +10,7 @@ function Todo( title, completed ) {
 
 function windowLoadHandler() {
     require(['../../src/remoteStorage'], function(remoteStorage) {
+      var todos;
       remoteStorage.displayWidget('remotestorage-connect');
       remoteStorage.defineModule('tasks', '0.1', function(baseModule) {
         function getUuid() {
@@ -28,6 +29,7 @@ function windowLoadHandler() {
         }
         return {
           getPrivateList: function(listName) {
+            remoteStorage.tasks.sync(listName+'/');
             return {
               getIds: function() {
                 return baseModule.get(listName+'/');
@@ -83,7 +85,6 @@ function windowLoadHandler() {
         };
       });
       remoteStorage.loadModule('tasks', '0.1', 'rw');
-      remoteStorage.tasks.sync('todos/');
       remoteStorage.tasks.on('error', function(err) {
       });
       remoteStorage.tasks.on('added', function(id, obj) {
@@ -95,11 +96,9 @@ function windowLoadHandler() {
       remoteStorage.tasks.on('removed', function(id) {
         refreshData();
       });
-
-      function addEventListeners() {
-          document.getElementById( 'new-todo' ).addEventListener( "keypress", newTodoKeyPressHandler, false );
-          document.getElementById( 'toggle-all' ).addEventListener( "change", toggleAllChangeHandler, false );
-      }
+      todos = remoteStorage.tasks.getPrivateList('todos');
+      document.getElementById( 'new-todo' ).addEventListener( "keypress", newTodoKeyPressHandler, false );
+      document.getElementById( 'toggle-all' ).addEventListener( "change", toggleAllChangeHandler, false );
 
       function inputEditTodoKeyPressHandler( event ) {
           var inputEditTodo,
@@ -129,9 +128,13 @@ function windowLoadHandler() {
       }
 
       function newTodoKeyPressHandler( event ) {
-          if ( event.keyCode === ENTER_KEY ) {
-              todos.add( document.getElementById( 'new-todo' ).value );
+        if ( event.keyCode === ENTER_KEY ) {
+
+          var trimmedText = document.getElementById( 'new-todo' ).value;
+          if ( trimmedText ) {
+            todos.add( trimmedText );
           }
+        }
       }
 
       function toggleAllChangeHandler( event ) {
@@ -145,7 +148,12 @@ function windowLoadHandler() {
       }
 
       function hrefClearClickHandler() {
-          removeTodosCompleted();
+          var ids = todos.getIds();
+          for(var i in ids) {
+              if ( todos.get(i).completed ) {
+                  todos.removeItem(i);
+              }
+         }
       }
 
       function todoContentHandler( event ) {
@@ -165,22 +173,6 @@ function windowLoadHandler() {
           var checkbox;
           checkbox = event.target;
           todos.markCompleted( checkbox.getAttribute( 'data-todo-id' ), checkbox.checked);
-      }
-
-      function addTodo( text ) {
-          var trimmedText = text.trim();
-          if ( trimmedText ) {
-              todos.add( trimmedText );
-          }
-      }
-
-      function removeTodosCompleted() {
-          var ids = todos.getIds();
-          for(var i in ids) {
-              if ( todos.get(i).completed ) {
-                  todos.removeItem(i);
-              }
-         }
       }
 
       function refreshData() {
