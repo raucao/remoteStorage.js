@@ -1,70 +1,6 @@
 define(
-  ['require', './platform', './couch', './dav', './simple'],
-  function (require, platform, couch, dav, simple) {
-    var getDriver = function (type, cb) {
-        if(type === 'https://www.w3.org/community/rww/wiki/read-write-web-00#couchdb'
-          || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#couchdb') {
-          cb(couch);
-        } else if(type === 'https://www.w3.org/community/rww/wiki/read-write-web-00#webdav'
-          || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#webdav') {
-          cb(dav);
-        } else {
-          cb(simple);
-        }
-      },
-      resolveKey = function(storageInfo, basePath, relPath, nodirs) {
-        var itemPathParts = ((basePath.length?(basePath + '/'):'') + relPath).split('/');
-        var item = itemPathParts.splice(1).join(nodirs ? '_' : '/');
-        return storageInfo.href + '/' + itemPathParts[0]
-          + (storageInfo.properties.legacySuffix ? storageInfo.properties.legacySuffix : '')
-          + '/' + (item[0] == '_' ? 'u' : '') + item;
-      },
-      create = function (storageInfo, basePath, token) {
-        return {
-          get: function (key, cb) {
-            if(typeof(key) != 'string') {
-              cb('argument "key" should be a string');
-            } else {
-              getDriver(storageInfo.type, function (d) {
-                d.get(resolveKey(storageInfo, basePath, key, storageInfo.nodirs), token, cb);
-              });
-            }
-          },
-          put: function (key, value, cb) {
-            if(typeof(key) != 'string') {
-              cb('argument "key" should be a string');
-            } else if(typeof(value) != 'string') {
-              cb('argument "value" should be a string');
-            } else {
-              getDriver(storageInfo.type, function (d) {
-                d.put(resolveKey(storageInfo, basePath, key, storageInfo.nodirs), value, token, cb);
-              });
-            }
-          },
-          'delete': function (key, cb) {
-            if(typeof(key) != 'string') {
-              cb('argument "key" should be a string');
-            } else {
-              getDriver(storageInfo.type, function (d) {
-                d['delete'](resolveKey(storageInfo, basePath, key, storageInfo.nodirs), token, cb);
-              });
-            }
-          },
-          sync: function (path) {
-          },
-          on: function(eventName, handler) {
-          }
-        };
-      };
-
-  return {
-    create : create
-  };
-});
-
-  //sync.js itself:
-
-  syncer = (function() {
+  ['require', './platform', './wireClient'],
+  function (require, wireClient) {
     var indexCache = {};
     var indexKey;
     var readyState={};
@@ -107,51 +43,20 @@ define(
     //for each [category]:
     //_unhosted$index:[category]
 
-    function connect(userAddress, categories, pullInterval, dialogPath) {
-      if(!typeof(userAddress) == 'string') {
-        return false;
-      }
-      var parts = userAddress.split('@');
-      if(parts.length != 2) {
-        return false;
-      }
-      if(parts[1].split('.').length < 2) {
-        return false;
-      }
-      ol('syncer.connect('
-        +JSON.stringify(userAddress)+', '
+    function startSync(categories, pullInterval, dialogPath) {
+      ol('startSync('
         +JSON.stringify(categories)+', '
         +JSON.stringify(pullInterval)+', '
         +JSON.stringify(dialogPath)+');');
-      if(localStorage['_unhosted$bearerToken']) {
-        console.log('err: already connected');
-        return;
-      }
-      if(typeof(dialogPath) === 'undefined') {
-        dialogPath = 'syncer/dialog.html';
-      }
       if(typeof(pullInterval) === 'undefined') {
         pullInterval = 60;
       }
-      localStorage['_unhosted$userAddress'] = userAddress;
       localStorage['_unhosted$categories'] = JSON.stringify(categories);
       localStorage['_unhosted$pullInterval'] = pullInterval;
-      window.open(dialogPath);
-      window.addEventListener('storage', function(event) {
-        if(event.key=='_unhosted$bearerToken' && event.newValue) {
           if(pullInterval) {
             setInterval(work, pullInterval*1000);//will first trigger a pull if it's time for that
           }
           changeReadyState('connected', true);
-        }
-        if(event.key=='_unhosted$dialogResult' && event.newValue) {
-          try {
-            console.log(JSON.parse(event.newValue));
-          } catch(e) {
-            console.log('unparseable dialog result');
-          }
-        }
-      }, false);
       return true;
     }
     function parseObj(str) {
@@ -424,72 +329,13 @@ define(
       }
       return cb ? null : items;
     }
-    function display(connectElement, categories, libDir, onChangeHandler) {
-      if(libDir.length && libDir[libDir.length - 1] != '/') {//libDir without trailing slash
-        libDir += '/'
-      }
-      document.getElementById(connectElement).innerHTML =
-        '<link href="'+libDir+'remoteStorage.css" rel="stylesheet">'
-        +'<input id="remotestorage-useraddress" type="text" placeholder="you@remotestorage" autofocus />'
-        +'<input id="remotestorage-status" class="remotestorage-button" type="submit" value="loading &hellip;" disabled />'
-        +'<img id="remotestorage-icon" class="remotestorage-loading" src="'+libDir+'remoteStorage-icon.png" />'
-        +'<span id="remotestorage-disconnect">Disconnect <strong></strong></span>'
-        +'<a id="remotestorage-info" href="http://unhosted.org/#remotestorage" target="_blank">?</a>'
-        +'<span id="remotestorage-infotext">This app allows you to use your own data storage!<br />Click for more info on the Unhosted movement.</span>'
-        +'<a id="remotestorage-get" class="remotestorage-button" href="http://unhosted.org/#remotestorage" target="_blank">get remoteStorage</a>';
-
-      document.getElementById('remotestorage-useraddress').onkeyup = function(e) { // connect on enter
-        if(e.keyCode==13) document.getElementById('remotestorage-status').click();
-      }
-
-      onReadyStateChange(function(obj) {
-        if(obj.connected) { // connected state
-          document.getElementById('remotestorage-connect').className = 'remotestorage-connected';
-          document.getElementById('remotestorage-disconnect').getElementsByTagName('strong')[0].innerHTML = getUserAddress();
-          if(obj.syncing) { // spin logo while syncing
-            document.getElementById('remotestorage-icon').className = 'remotestorage-loading';
-          } else { // do not spin when not syncing
-            document.getElementById('remotestorage-icon').className = '';
-          }
-          document.getElementById('remotestorage-icon').onclick = function() { // when connected, disconnect on logo click
-            localStorage.clear();
-            onChangeHandler({key: null, oldValue: null, newValue: null});
-            changeReadyState('connected', false);
-            document.getElementById('remotestorage-connect').className = '';
-            document.getElementById('remotestorage-get').style.display = 'inline';
-          }
-        } else { // disconnected, initial state
-          document.getElementById('remotestorage-icon').className = '';
-          document.getElementById('remotestorage-useraddress').disabled = true;
-          document.getElementById('remotestorage-useraddress').style.display = 'none';
-          document.getElementById('remotestorage-status').disabled = false;
-          document.getElementById('remotestorage-status').value = 'connect';
-
-          document.getElementById('remotestorage-status').onclick = function() {
-            if(document.getElementById('remotestorage-useraddress').disabled == true) { // first click on connect reveals the input
-              document.getElementById('remotestorage-get').style.display = 'none';
-              document.getElementById('remotestorage-useraddress').style.display = 'inline';
-              document.getElementById('remotestorage-useraddress').disabled = false;
-              document.getElementById('remotestorage-useraddress').focus();
-            } else { // second click on connect starts the connection
-              document.getElementById('remotestorage-icon').className = 'remotestorage-loading';
-              document.getElementById('remotestorage-useraddress').disabled = true;
-              document.getElementById('remotestorage-status').disabled = true;
-              document.getElementById('remotestorage-status').value = 'connecting';
-              connect(document.getElementById('remotestorage-useraddress').value, categories, 10, libDir+'dialog.html');
-            }
-          };
-        }
-      });
-      onChange(onChangeHandler);
-      //init all data:
-      for(var i=0; i < categories.length; i++) {
-        getCollection(categories[i], function(item, key) {
-          onChangeHandler({category: categories[i], key: key, newValue: item, oldValue: undefined});
-        });
-      }
-    }
     onLoad();
+              //baseModule: delete[silent=false], set[silent=false], sync, get, on:error,populated,changed
+    //onload, should trigger populated
+    //delete,set should trigger push if online.
+    //connection established should trigger pull and push in all clients, and if something changed, trigger populated
+    //timer should trigger pull, and if something changes, trigger changed.
+    //
     return {
       getItem       : getItem,
       getCollection : getCollection,
@@ -499,23 +345,3 @@ define(
       inspect       : inspect
     };
   })();
-  //API:
-  //
-  // - call display(connectElement, categories, libDir, onChangeHandler({key:.., oldValue:.., newValue:..}));
-  // - getCollection retrieves the array of items regardless of their id (so it makes sense to store the id inside the item)
-  // - CRUD: getItem gets one item. setItem for create and update. removeItem for delete.
-  //
-  // a note on sync:
-  // if just one client connects, then it will feel like localStorage while the user is connected. the only special case there is the moment the user connects.
-  // when the page loads for the first time, there will be no data. then the user connects, and your app will receive onChange events. make sure you handle these well.
-  // in fact, your app should already have a handler for 'storage' events, because they occur when another tab or window makes a change to localStorage.
-  // so you'll be able to reuse that function.
-  //
-  // if the user tries to leave the page while there is still unsynced data, a 'leave page?' alert will be displayed. disconnecting while offline will lead to loss of data too.
-  // but as long as you don't disconnect, it'll all be fine, and sync will resume when the tab is reopened and/or connectivity is re-established.
-  //
-  // when another device or browser makes a change, it will come in through your onChange handler. it will 'feel' like a change that came from another tab.
-  // when another device makes a change while either that device or you, or both are disconnected from the remoteStorage, the change will come in later, and conflict resolution 
-  // will be per item, on timestamp basis. note that these are the timestamps generated on the devices, so this only works well if all devices have their clocks in sync.
-  // in all cases, you will get an event on your onChange handler for each time data is changed by another device. the event will contain both the old and the new value of the item,
-  // so you can always override a change by issuing a setItem command back to the oldValue.

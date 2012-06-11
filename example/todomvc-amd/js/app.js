@@ -37,18 +37,18 @@ function windowLoadHandler() {
               get: function(id) {
                 baseModule.get(listName+'/'+id);
               },
-              set: function(id, obj) {
-                baseModule.set(listName+'/'+id, JSON.stringify(obj));
+              set: function(id, obj, silent) {
+                baseModule.set(listName+'/'+id, JSON.stringify(obj), silent);
               },
-              add: function(text) {
+              add: function(text, silent) {
                 var id = getUuid();
                 baseModule.set(listName+'/'+id, JSON.stringify({
                   text: text,
                   completed: false
-                }));
+                }), silent);
                 return id;
               },
-              markCompleted: function(id, completedVal) {
+              markCompleted: function(id, completedVal, silent) {
                 if(typeof(completedVal) == 'undefined') {
                   completedVal = true;
                 }
@@ -58,7 +58,7 @@ function windowLoadHandler() {
                     var obj = JSON.parse(objStr);
                     if(obj && obj.completed != completedVal) {
                       obj.completed = completedVal;
-                      baseModule.set(listName+'/'+id, JSON.stringify(obj));
+                      baseModule.set(listName+'/'+id, JSON.stringify(obj), silent);
                     }
                   } catch(e) {
                   }
