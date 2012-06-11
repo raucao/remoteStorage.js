@@ -1,6 +1,6 @@
 define(
-  ['require', './lib/platform', './lib/couch', './lib/dav', './lib/simple', './lib/webfinger', './lib/hardcoded', './lib/widget', './lib/syncClient'],
-  function (require, platform, couch, dav, simple, webfinger, hardcoded, widget, syncClient) {
+  ['require', './lib/platform', './lib/couch', './lib/dav', './lib/simple', './lib/webfinger', './lib/hardcoded', './lib/widget', './lib/syncClient', './lib/wireClient'],
+  function (require, platform, couch, dav, simple, webfinger, hardcoded, widget, syncClient, wireClient) {
 
     var modules = {
       },
