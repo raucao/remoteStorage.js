@@ -96,7 +96,9 @@ This is version 0.5.6 of the library, and you can use it under AGPL or MIT licen
 
 ## code structure
 
-
+    remoteStorage base -> widget -> session -> webfinger
+                                            -> hardcoded
+                                            -> platform
     remoteStorage base -> e.g. 'tasks' module -> baseClient -> cache
                                                             -> storageEventsClient
                                                             -> wireClient           -> dav
