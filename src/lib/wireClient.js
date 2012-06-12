@@ -1,3 +1,18 @@
+//the session holds the storage info, so when logged in, you go:
+//application                                application
+//    module                             module
+//        baseClient                 baseClient
+//            cache              cache
+//                session    session
+//                    wireClient
+//
+//and if you're not logged in it's simply:
+//
+//application                application
+//      module              module
+//        baseClient  baseClient
+//                cache 
+
 define(
   ['require', './platform', './couch', './dav', './simple'],
   function (require, platform, couch, dav, simple) {

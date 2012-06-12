@@ -97,4 +97,4 @@ define(['./cache', './wireClient'], function (cache, storageEventClient, wireCli
   return {
     create: create
   };
-})();
+});
