@@ -12,7 +12,7 @@ function windowLoadHandler() {
     require(['../../src/remoteStorage'], function(remoteStorage) {
       var todos;
       remoteStorage.displayWidget('remotestorage-connect');
-      remoteStorage.defineModule('tasks', '0.1', function(baseModule) {
+      remoteStorage.defineModule('tasks', '0.1', function(baseClient) {
         function getUuid() {
             var uuid = '',
                 i,
@@ -32,17 +32,17 @@ function windowLoadHandler() {
             remoteStorage.tasks.sync(listName+'/');
             return {
               getIds: function() {
-                return baseModule.get(listName+'/');
+                return baseClient.get(listName+'/');
               },
               get: function(id) {
-                baseModule.get(listName+'/'+id);
+                baseClient.get(listName+'/'+id);
               },
               set: function(id, obj, silent) {
-                baseModule.set(listName+'/'+id, JSON.stringify(obj), silent);
+                baseClient.set(listName+'/'+id, JSON.stringify(obj), silent);
               },
               add: function(text, silent) {
                 var id = getUuid();
-                baseModule.set(listName+'/'+id, JSON.stringify({
+                baseClient.set(listName+'/'+id, JSON.stringify({
                   text: text,
                   completed: false
                 }), silent);
@@ -52,13 +52,13 @@ function windowLoadHandler() {
                 if(typeof(completedVal) == 'undefined') {
                   completedVal = true;
                 }
-                var objStr = baseModule.get(listName+'/'+id);
+                var objStr = baseClient.get(listName+'/'+id);
                 if(objStr) {
                   try {
                     var obj = JSON.parse(objStr);
                     if(obj && obj.completed != completedVal) {
                       obj.completed = completedVal;
-                      baseModule.set(listName+'/'+id, JSON.stringify(obj), silent);
+                      baseClient.set(listName+'/'+id, JSON.stringify(obj), silent);
                     }
                   } catch(e) {
                   }
@@ -72,7 +72,7 @@ function windowLoadHandler() {
                 };
               },
               remove: function(id) {
-                baseModule.delete(listName+'/'+id);
+                baseClient.remove(listName+'/'+id);
               }
             };
           },
@@ -80,8 +80,8 @@ function windowLoadHandler() {
           },
           getPublicList: function(name, userAddress) {
           },
-          sync: baseModule.sync,
-          on: baseModule.on
+          sync: baseClient.sync,
+          on: baseClient.on
         };
       });
       remoteStorage.loadModule('tasks', '0.1', 'rw');
