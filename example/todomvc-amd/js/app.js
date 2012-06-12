@@ -30,7 +30,11 @@ function windowLoadHandler() {
         function getPrivateList(listName) {
           baseClient.syncPrivate(listName+'/');
           function getIds() {
-            return baseClient.getPrivate(listName+'/');
+            var myHashmap= baseClient.getPrivate(listName+'/'), myArray=[];
+            for(var i in myHashmap) {
+              myArray.push(i);
+            }
+            return myArray;
           }
           function get(id) {
             baseClient.getPrivate(listName+'/'+id);
@@ -63,11 +67,19 @@ function windowLoadHandler() {
             }
           }
           function getStats() {
-            return {
-              todoLeft: 0,
+            var stat = {
+              todoLeft: getIds().length,
               todoCompleted: 0,
               totalTodo: 0
             };
+
+            for (var i=0; i<stat.todoLeft; i++) {
+              if (todos[i].completed) {
+                stat.todoCompleted += 1;
+              }
+            }
+            stat.todoLeft = stat.totalTodo - stat.todoCompleted;
+            return stat;
           }
           function remove(id) {
             baseClient.removePrivate(listName+'/'+id);
@@ -177,25 +189,11 @@ function windowLoadHandler() {
       }
 
       function refreshData() {
-          computeStats();
-          redrawTodosUI();
-          redrawStatsUI();
-          changeToggleAllCheckboxState();
+          var stats = todos.getStats();
+          redrawTodosUI(stats);
+          redrawStatsUI(stats);
+          changeToggleAllCheckboxState(stats);
       }
-
-      function computeStats() {
-          var i;
-
-          stat = new Stat();
-          stat.totalTodo = todos.length;
-          for ( i=0; i < todos.length; i++ ) {
-              if ( todos[i].completed ) {
-                  stat.todoCompleted += 1;
-              }
-          }
-          stat.todoLeft = stat.totalTodo - stat.todoCompleted;
-      }
-
 
       function redrawTodosUI() {
 
@@ -276,7 +274,7 @@ function windowLoadHandler() {
 
       }
 
-      function changeToggleAllCheckboxState() {
+      function changeToggleAllCheckboxState(stat) {
           var toggleAll = document.getElementById( 'toggle-all' );
           if ( stat.todoCompleted === todos.length ) {
               toggleAll.checked = true;
@@ -285,7 +283,7 @@ function windowLoadHandler() {
           }
       }
 
-      function redrawStatsUI() {
+      function redrawStatsUI(stat) {
           removeChildren( document.getElementsByTagName( 'footer' )[ 0 ] );
           document.getElementById( 'footer' ).style.display = todos.length ? 'block' : 'none';
 
@@ -298,7 +296,7 @@ function windowLoadHandler() {
           }
       }
 
-      function drawTodoCount() {
+      function drawTodoCount(stat) {
 
           var number,
               theText,
@@ -320,7 +318,7 @@ function windowLoadHandler() {
           document.getElementsByTagName( 'footer' )[ 0 ].appendChild( remaining );
       }
 
-      function drawTodoClear() {
+      function drawTodoClear(stat) {
 
           var buttonClear = document.createElement( 'button' );
           buttonClear.id = 'clear-completed';

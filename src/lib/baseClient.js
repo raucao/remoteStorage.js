@@ -26,7 +26,20 @@ define(['./session'], function (session) {
       }
     });
     function cacheGet(path) {
-      return localStorage.getItem(prefix+path);
+      var valueStr = localStorage.getItem(prefix+path);
+      if(path.substr(-1) == '/') {
+        if(valueStr) {
+          try {
+            var value = JSON.parse(valueStr);
+          } catch(e) {
+            fire('error', e);
+          }
+        } else {
+          return {};
+        }
+      } else {
+        return valueStr;
+      }
     }
     function cacheSet(path, valueStr) {
       return localStorage.setItem(prefix+path, valueStr);
@@ -136,15 +149,15 @@ define(['./session'], function (session) {
     return {
       on: on,//error,change(origin=tab,device,cloud)
       
-      getPrivate: getPrivate,
-      set: setPrivate,
-      removePrivate: removePrivate,
-      syncPrivate : syncPrivate,
+      getPrivate    : getPrivate,
+      setPrivate    : setPrivate,
+      removePrivate : removePrivate,
+      syncPrivate   : syncPrivate,
 
-      getPublic: getPublic,
-      setPublic: setPublic,
-      removePublic: removePublic,
-      syncPublic : syncPublic
+      getPublic    : getPublic,
+      setPublic    : setPublic,
+      removePublic : removePublic,
+      syncPublic   : syncPublic
     };
   }
   
