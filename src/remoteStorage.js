@@ -1,7 +1,7 @@
 define(
   ['require', './lib/platform', './lib/couch', './lib/dav', './lib/simple', './lib/webfinger', './lib/hardcoded', './lib/widget',
-    './lib/baseClient', './lib/cache', './lib/wireClient'],
-  function (require, platform, couch, dav, simple, webfinger, hardcoded, widget, baseClient, cache, wireClient) {
+    './lib/baseClient', './lib/wireClient'],
+  function (require, platform, couch, dav, simple, webfinger, hardcoded, widget, baseClient, wireClient) {
     var modules = {
       },
       defineModule = function(moduleName, version, module) {
