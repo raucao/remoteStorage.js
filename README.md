@@ -93,3 +93,13 @@ This is version 0.5.6 of the library, and you can use it under AGPL or MIT licen
     cd build
     node build.js
 
+
+## code structure
+
+
+    remoteStorage base -> e.g. 'tasks' module -> baseClient -> cache
+                                                            -> storageEventsClient
+                                                            -> wireClient           -> dav
+                                                                                    -> simple
+                                                                                    -> couch
+                                                                                    -> platform
