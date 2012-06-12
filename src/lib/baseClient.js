@@ -1,5 +1,5 @@
 //this is the base module. it is the basis for specific modules, and deals with coordinating the cache, events from other tabs, and all wire traffic with the cloud
-define(['./cache'], function (cache, storageEventClient, wireClient) {
+define(['./session'], function (session) {
   function create(moduleName, syncInterval) {
     var handlers = { changed: []},
       prefix = 'remote_storage_cache:';
@@ -27,13 +27,13 @@ define(['./cache'], function (cache, storageEventClient, wireClient) {
     });
     function cacheGet(path) {
       return localStorage.getItem(prefix+path);
-    },
+    }
     function cacheSet(path, valueStr) {
       return localStorage.setItem(prefix+path, valueStr);
-    },
+    }
     function cacheRemove(path) {
       return localStorage.removeItem(prefix+path);
-    },
+    }
     function on(eventName, cb) {
       if(eventName=='changed') {
         handlers.changed.push(cb);
@@ -126,12 +126,12 @@ define(['./cache'], function (cache, storageEventClient, wireClient) {
         }
       });
     }
-    function syncNow() {
-      doSync(moduleName+'/');
-      doSync('public/'+moduleName+'/');
+    function syncPrivate(path) {
+      doSync(moduleName+'/'+path);
     }
-    setTimeout(syncNow, 0);//allow the current code execution to register the necessary handlers, then immediately (after a 0ms delay) start syncing
-    setInterval(syncNow, syncInterval);//check for updates from other devices periodically
+    function syncPublic(path) {
+      doSync('public/'+moduleName+'/'+path);
+    }
     
     return {
       on: on,//error,change(origin=tab,device,cloud)
@@ -139,12 +139,12 @@ define(['./cache'], function (cache, storageEventClient, wireClient) {
       getPrivate: getPrivate,
       set: setPrivate,
       removePrivate: removePrivate,
+      syncPrivate : syncPrivate,
 
       getPublic: getPublic,
       setPublic: setPublic,
       removePublic: removePublic,
-      
-      syncNow: syncNow
+      syncPublic : syncPublic
     };
   }
   

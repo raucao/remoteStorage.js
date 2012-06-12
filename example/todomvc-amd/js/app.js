@@ -10,93 +10,94 @@ function Todo( title, completed ) {
 
 function windowLoadHandler() {
     require(['../../src/remoteStorage'], function(remoteStorage) {
-      var todos;
+      var todos, moduleName = 'tasks', moduleVersion = '0.1';
       remoteStorage.displayWidget('remotestorage-connect');
-      remoteStorage.defineModule('tasks', '0.1', function(baseClient) {
+      remoteStorage.defineModule(moduleName, moduleVersion, function(baseClient) {
         function getUuid() {
-            var uuid = '',
-                i,
-                random;
+          var uuid = '',
+              i,
+              random;
 
-            for ( i = 0; i < 32; i++ ) {
-                random = Math.random() * 16 | 0;
-                if ( i === 8 || i === 12 || i === 16 || i === 20 ) {
-                    uuid += '-';
-                }
-                uuid += ( i === 12 ? 4 : (i === 16 ? (random & 3 | 8) : random) ).toString( 16 );
-            }
-            return uuid;
-        }
-        return {
-          getPrivateList: function(listName) {
-            remoteStorage.tasks.sync(listName+'/');
-            return {
-              getIds: function() {
-                return baseClient.get(listName+'/');
-              },
-              get: function(id) {
-                baseClient.get(listName+'/'+id);
-              },
-              set: function(id, obj, silent) {
-                baseClient.set(listName+'/'+id, JSON.stringify(obj), silent);
-              },
-              add: function(text, silent) {
-                var id = getUuid();
-                baseClient.set(listName+'/'+id, JSON.stringify({
-                  text: text,
-                  completed: false
-                }), silent);
-                return id;
-              },
-              markCompleted: function(id, completedVal, silent) {
-                if(typeof(completedVal) == 'undefined') {
-                  completedVal = true;
-                }
-                var objStr = baseClient.get(listName+'/'+id);
-                if(objStr) {
-                  try {
-                    var obj = JSON.parse(objStr);
-                    if(obj && obj.completed != completedVal) {
-                      obj.completed = completedVal;
-                      baseClient.set(listName+'/'+id, JSON.stringify(obj), silent);
-                    }
-                  } catch(e) {
-                  }
-                }
-              },
-              getStats: function() {
-                return {
-                  todoLeft: 0,
-                  todoCompleted: 0,
-                  totalTodo: 0
-                };
-              },
-              remove: function(id) {
-                baseClient.remove(listName+'/'+id);
+          for ( i = 0; i < 32; i++ ) {
+              random = Math.random() * 16 | 0;
+              if ( i === 8 || i === 12 || i === 16 || i === 20 ) {
+                  uuid += '-';
               }
+              uuid += ( i === 12 ? 4 : (i === 16 ? (random & 3 | 8) : random) ).toString( 16 );
+          }
+          return uuid;
+        }
+        function getPrivateList(listName) {
+          baseClient.syncPrivate(listName+'/');
+          function getIds() {
+            return baseClient.getPrivate(listName+'/');
+          }
+          function get(id) {
+            baseClient.getPrivate(listName+'/'+id);
+          }
+          function set(id, obj, silent) {
+            baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj), silent);
+          }
+          function add(text, silent) {
+            var id = getUuid();
+            baseClient.setPrivate(listName+'/'+id, JSON.stringify({
+              text: text,
+              completed: false
+            }), silent);
+            return id;
+          }
+          function markCompleted(id, completedVal, silent) {
+            if(typeof(completedVal) == 'undefined') {
+              completedVal = true;
+            }
+            var objStr = baseClient.getPrivate(listName+'/'+id);
+            if(objStr) {
+              try {
+                var obj = JSON.parse(objStr);
+                if(obj && obj.completed != completedVal) {
+                  obj.completed = completedVal;
+                  baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj), silent);
+                }
+              } catch(e) {
+              }
+            }
+          }
+          function getStats() {
+            return {
+              todoLeft: 0,
+              todoCompleted: 0,
+              totalTodo: 0
             };
-          },
-          getLimitedList: function(name, secret) {
-          },
-          getPublicList: function(name, userAddress) {
-          },
-          sync: baseClient.sync,
-          on: baseClient.on
-        };
-      });
+          }
+          function remove(id) {
+            baseClient.removePrivate(listName+'/'+id);
+          }
+          function on(eventType, cb) {
+            baseClient.on(eventType, cb);
+          }
+          return {
+            getIds        : getIds,
+            get           : get,
+            set           : set,
+            add           : add,
+            remove        : remove,
+            markCompleted : markCompleted,
+            getStats      : getStats,
+            on            : on
+          };//end return
+        }//end function getPrivateList
+        return {
+          getPrivateList : getPrivateList
+        };//end return
+      });//end defineModule
       remoteStorage.loadModule('tasks', '0.1', 'rw');
-      remoteStorage.tasks.on('error', function(err) {
-      });
-      remoteStorage.tasks.on('added', function(id, obj) {
-        refreshData();
-      });
-      remoteStorage.tasks.on('changed', function(id, oldObj, newObj) {
-        refreshData();
-      });
-      remoteStorage.tasks.on('removed', function(id) {
-        refreshData();
-      });
       todos = remoteStorage.tasks.getPrivateList('todos');
+      todos.on('error', function(err) {
+      });
+      todos.on('changed', function(id, obj) {
+        refreshData();
+      });
+      refreshData();
       document.getElementById( 'new-todo' ).addEventListener( "keypress", newTodoKeyPressHandler, false );
       document.getElementById( 'toggle-all' ).addEventListener( "change", toggleAllChangeHandler, false );
 
