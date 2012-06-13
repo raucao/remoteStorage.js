@@ -2,7 +2,8 @@
 define(['./session'], function (session) {
   function create(moduleName, syncInterval) {
     var handlers = { change: []},
-      prefix = 'remote_storage_cache:';
+      prefix = 'remote_storage_cache:',
+      now = new Date().getTime();
     function fire(eventName, eventObj) {
       if(handlers[eventName]) {
         for(var i=0; i<handlers[eventName].length; i++) {
@@ -27,7 +28,7 @@ define(['./session'], function (session) {
     });
     function cacheGet(path) {
       var valueStr = localStorage.getItem(prefix+path);
-      if(path.substr(-1) == '/') {
+      if(isDir(path)) {
         if(valueStr) {
           try {
             var value = JSON.parse(valueStr);
@@ -41,7 +42,54 @@ define(['./session'], function (session) {
         return valueStr;
       }
     }
+    function isDir(path) {
+      return path.substr(-1) == '/';
+    }
+    function getContainingDir(path) {
+      var parts = path.split('/');
+      if(isDir(path)) {
+        return parts.slice(0,parts.length-2).join('/');
+      } else {
+        return parts.slice(0,parts.length-1).join('/');
+      }
+    }
+    function getFileName(path) {
+      var parts = path.split('/');
+      if(isDir(path)) {
+        return parts[parts.length-2]+'/';
+      } else {
+        return parts[parts.length-1];
+      }
+    }
+    function getCurrTimestamp() {
+      return now;
+    }
+    function rebuildNow(path) {
+      var obj = {};
+      for(var i=0; i<localStorage.length; i++) {
+        var key = localStorage.keys[i];
+        if(key.substr(0,prefix.length+path.length)=prefix+path) {
+          obj[getFileName(key)]=getCurrTimestamp();
+        }
+      }
+      return obj;
+    }
     function cacheSet(path, valueStr) {
+      var containingDir = getContainingDir(path);
+      var currIndexStr = localStorage.getItem(prefix+containingDir);
+      var currIndex;
+      if(typeof(currIndexStr) == 'string') {
+        try {
+          currIndex = JSON.parse(currIndexStr);
+        } catch(e) {
+          fire('error', e);
+        }
+      }
+      if(!currIndex) {
+        currIndex = rebuildNow(containingDir);
+      }
+      currIndex[getFileName(path)] = getCurrTimestamp();
+      localStorage.setItem(prefix+containingDir, JSON.stringify(currIndex));
       return localStorage.setItem(prefix+path, valueStr);
     }
     function cacheRemove(path) {
@@ -99,14 +147,14 @@ define(['./session'], function (session) {
       return cacheRemove(absPath);
     }
     function push(path) {
-      if(path.substr(-1) == '/') {
+      if(isDir(path)) {
         doSync(path);
       } else {
         session.notifySet(path, cacheGet(path));
       }
     }
     function pull(path) {
-      if(key.substr(-1) == '/') {
+      if(isDir(key)) {
         sync(path);
       } else {
         session.getRemote(path, function(err, data) {
