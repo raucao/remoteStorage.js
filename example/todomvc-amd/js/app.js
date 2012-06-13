@@ -1,4 +1,3 @@
-var ENTER_KEY = 13;
 
 window.addEventListener( "load", windowLoadHandler, false );
 
@@ -8,8 +7,15 @@ function Todo( title, completed ) {
     this.completed = completed;
 }
 
+var inited=false;
 function windowLoadHandler() {
     require(['../../src/remoteStorage'], function(remoteStorage) {
+      //don't know why require executes the callback twice, but it does, so we need this:
+      if(inited) {
+        return;
+      } else {
+        inited = true;
+      }
       var todos, moduleName = 'tasks', moduleVersion = '0.1';
       remoteStorage.displayWidget('remotestorage-connect');
       remoteStorage.defineModule(moduleName, moduleVersion, function(baseClient) {
@@ -106,10 +112,11 @@ function windowLoadHandler() {
       todos = remoteStorage.tasks.getPrivateList('todos');
       todos.on('error', function(err) {
       });
-      todos.on('changed', function(id, obj) {
+      todos.on('change', function(id, obj) {
         refreshData();
       });
       refreshData();
+      var ENTER_KEY = 13;
       document.getElementById( 'new-todo' ).addEventListener( "keypress", newTodoKeyPressHandler, false );
       document.getElementById( 'toggle-all' ).addEventListener( "change", toggleAllChangeHandler, false );
 

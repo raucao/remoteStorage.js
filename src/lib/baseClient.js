@@ -1,7 +1,7 @@
 //this is the base module. it is the basis for specific modules, and deals with coordinating the cache, events from other tabs, and all wire traffic with the cloud
 define(['./session'], function (session) {
   function create(moduleName, syncInterval) {
-    var handlers = { changed: []},
+    var handlers = { change: []},
       prefix = 'remote_storage_cache:';
     function fire(eventName, eventObj) {
       if(handlers[eventName]) {
@@ -48,8 +48,8 @@ define(['./session'], function (session) {
       return localStorage.removeItem(prefix+path);
     }
     function on(eventName, cb) {
-      if(eventName=='changed') {
-        handlers.changed.push(cb);
+      if(eventName=='change') {
+        handlers.change.push(cb);
       }
     }
     function getPrivate(path) {
@@ -73,10 +73,10 @@ define(['./session'], function (session) {
       fire('change', {
         origin: 'tab',
         path: absPath,
-        oldValue: cache.get(absPath),
+        oldValue: cacheGet(absPath),
         newValue: valueStr
       });
-      return cache.set(absPath, valueStr);
+      return cacheSet(absPath, valueStr);
     }
     function removePrivate(path) {
       remove(moduleName+'/'+path);
@@ -93,10 +93,10 @@ define(['./session'], function (session) {
       fire('change', {
         origin: 'tab',
         path: absPath,
-        oldValue: cache.get(absPath),
+        oldValue: cacheGet(absPath),
         newValue: undefined
       });
-      return cache.remove(absPath);
+      return cacheRemove(absPath);
     }
     function push(path) {
       if(path.substr(-1) == '/') {
