@@ -54,9 +54,9 @@ define(['./session'], function (session) {
     function getContainingDir(path) {
       var parts = path.split('/');
       if(isDir(path)) {
-        return parts.slice(0,parts.length-2).join('/');
+        return parts.slice(0,parts.length-2).join('/')+'/';
       } else {
-        return parts.slice(0,parts.length-1).join('/');
+        return parts.slice(0,parts.length-1).join('/')+'/';
       }
     }
     function getFileName(path) {
@@ -100,8 +100,8 @@ define(['./session'], function (session) {
         currIndex = rebuildNow(containingDir);
       }
       currIndex[getFileName(path)] = getCurrTimestamp();
-      memCache[containingDir+'/'] = JSON.stringify(currIndex);
-      localStorage.setItem(prefix+containingDir+'/', memCache[containingDir+'/']);
+      memCache[containingDir] = JSON.stringify(currIndex);
+      localStorage.setItem(prefix+containingDir, memCache[containingDir+'/']);
       memCache[path] = valueStr;
       return localStorage.setItem(prefix+path, valueStr);
     }
