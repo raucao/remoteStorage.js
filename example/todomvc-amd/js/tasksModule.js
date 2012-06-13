@@ -1,4 +1,12 @@
 function TasksModule(baseClient) {
+  var errorHandlers=[];
+  function fire(eventType, eventObj) {
+    if(eventType == 'error') {
+      for(var i=0; i<errorHandlers.length; i++) {
+        errorHandlers[i](eventObj);
+      }
+    }
+  }
   function getUuid() {
     var uuid = '',
         i,
@@ -57,6 +65,7 @@ function TasksModule(baseClient) {
             baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj));
           }
         } catch(e) {
+          fire('error', e);
         }
       }
     }
@@ -84,6 +93,9 @@ function TasksModule(baseClient) {
     }
     function on(eventType, cb) {
       baseClient.on(eventType, cb);
+      if(eventType == 'error') {
+        errorHandlers.push(cb);
+      }
     }
     return {
       getIds        : getIds,
