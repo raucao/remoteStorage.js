@@ -59,10 +59,10 @@ define(['./session'], function (session) {
       return cacheGet('public/'+moduleName+'/'+path);
     }
     function setPrivate(path, valueStr) {
-      return cacheSet(moduleName+'/'+path, valueStr);
+      return set(moduleName+'/'+path, valueStr);
     }
     function setPublic(path, valueStr) {
-      return cacheSet('public/'+moduleName+'/'+path, valueStr);
+      return set('public/'+moduleName+'/'+path, valueStr);
     }
     function set(absPath, valueStr) {
       session.notifySet(absPath, valueStr, function(err) {
