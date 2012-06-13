@@ -3,7 +3,8 @@ define(['./session'], function (session) {
   function create(moduleName, syncInterval) {
     var handlers = { change: []},
       prefix = 'remote_storage_cache:',
-      now = new Date().getTime();
+      now = new Date().getTime(),
+      memCache = {};
     function fire(eventName, eventObj) {
       if(handlers[eventName]) {
         for(var i=0; i<handlers[eventName].length; i++) {
@@ -27,7 +28,7 @@ define(['./session'], function (session) {
       }
     });
     function cacheGet(path) {
-      var valueStr = localStorage.getItem(prefix+path);
+      var valueStr = memCache[path] ? memCache[path] : localStorage.getItem(prefix+path);
       if(isDir(path)) {
         if(valueStr) {
           var value;
@@ -36,7 +37,8 @@ define(['./session'], function (session) {
           } catch(e) {
             fire('error', e);
             value = rebuildNow(path);
-            localStorage.setItem(prefix+path, JSON.stringify(value));
+            memCache[path]=JSON.stringify(value);
+            localStorage.setItem(prefix+path, memCache[path]);
           }
           return value;
         } else {
@@ -76,11 +78,16 @@ define(['./session'], function (session) {
           obj[getFileName(key)]=getCurrTimestamp();
         }
       }
+      for(var key in memCache) {
+        if(key.length > prefix.length+path.length && key.substr(0, prefix.length+path.length)==prefix+path) {
+          obj[getFileName(key)]=getCurrTimestamp();
+        }
+      }
       return obj;
     }
     function cacheSet(path, valueStr) {
       var containingDir = getContainingDir(path);
-      var currIndexStr = localStorage.getItem(prefix+containingDir);
+      var currIndexStr = memCache[containingDir] ? memCache[containingDir] : localStorage.getItem(prefix+containingDir);
       var currIndex;
       if(typeof(currIndexStr) == 'string') {
         try {
@@ -93,10 +100,13 @@ define(['./session'], function (session) {
         currIndex = rebuildNow(containingDir);
       }
       currIndex[getFileName(path)] = getCurrTimestamp();
-      localStorage.setItem(prefix+containingDir+'/', JSON.stringify(currIndex));
+      memCache[containingDir+'/'] = JSON.stringify(currIndex);
+      localStorage.setItem(prefix+containingDir+'/', memCache[containingDir+'/']);
+      memCache[path] = valueStr;
       return localStorage.setItem(prefix+path, valueStr);
     }
     function cacheRemove(path) {
+      memCache[path] = undefined;
       return localStorage.removeItem(prefix+path);
     }
     function on(eventName, cb) {
