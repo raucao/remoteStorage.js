@@ -132,13 +132,14 @@ define(['./session'], function (session) {
           fire('error', err);
         }
       });
+      var ret = cacheSet(absPath, valueStr);
       fire('change', {
         origin: 'tab',
         path: absPath,
         oldValue: cacheGet(absPath),
         newValue: valueStr
       });
-      return cacheSet(absPath, valueStr);
+      return ret; 
     }
     function removePrivate(path) {
       remove(moduleName+'/'+path);
@@ -152,13 +153,14 @@ define(['./session'], function (session) {
           fire('error', err);
         }
       });
+      var ret = cacheRemove(absPath);
       fire('change', {
         origin: 'tab',
         path: absPath,
         oldValue: cacheGet(absPath),
         newValue: undefined
       });
-      return cacheRemove(absPath);
+      return ret;
     }
     function push(path) {
       if(isDir(path)) {
