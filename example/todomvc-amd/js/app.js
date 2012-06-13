@@ -18,7 +18,7 @@ function windowLoadHandler() {
       }
       var todos;
       remoteStorage.displayWidget('remotestorage-connect');
-      remoteStorage.defineModule('tasks', '0.1', TaskModule);
+      remoteStorage.defineModule('tasks', '0.1', TasksModule);
       remoteStorage.loadModule('tasks', '0.1', 'rw');
       todos = remoteStorage.tasks.getPrivateList('todos');
       todos.on('error', function(err) {
@@ -75,7 +75,7 @@ function windowLoadHandler() {
       }
 
       function spanDeleteClickHandler( event ) {
-          removeTodoById( event.target.getAttribute( 'data-todo-id' ) );
+          todos.remove( event.target.getAttribute( 'data-todo-id' ) );
       }
 
       function hrefClearClickHandler() {
@@ -126,14 +126,14 @@ function windowLoadHandler() {
               i;
 
           ul = document.getElementById( 'todo-list' );
-
-          document.getElementById( 'main' ).style.display = todos.length ? 'block' : 'none';
+          var ids = todos.getIds();
+          document.getElementById( 'main' ).style.display = ids.length ? 'block' : 'none';
 
           ul.innerHTML = "";
           document.getElementById( 'new-todo' ).value = '';
 
-          for ( i= 0; i < todos.length; i++ ) {
-              todo = todos[i];
+          for ( i= 0; i < ids.length; i++ ) {
+              todo = todos.get(ids[i]);
 
               // create checkbox
               checkbox = document.createElement( 'input' );
@@ -194,7 +194,7 @@ function windowLoadHandler() {
 
       function changeToggleAllCheckboxState(stat) {
           var toggleAll = document.getElementById( 'toggle-all' );
-          if ( stat.todoCompleted === todos.length ) {
+          if ( stat.todoCompleted === stat.totalTodo ) {
               toggleAll.checked = true;
           } else {
               toggleAll.checked = false;
@@ -203,7 +203,7 @@ function windowLoadHandler() {
 
       function redrawStatsUI(stat) {
           removeChildren( document.getElementsByTagName( 'footer' )[ 0 ] );
-          document.getElementById( 'footer' ).style.display = todos.length ? 'block' : 'none';
+          document.getElementById( 'footer' ).style.display = stat.totalTodo ? 'block' : 'none';
 
           if ( stat.todoCompleted > 0 ) {
               drawTodoClear();

@@ -30,11 +30,15 @@ define(['./session'], function (session) {
       var valueStr = localStorage.getItem(prefix+path);
       if(isDir(path)) {
         if(valueStr) {
+          var value;
           try {
-            var value = JSON.parse(valueStr);
+            value = JSON.parse(valueStr);
           } catch(e) {
             fire('error', e);
+            value = rebuildNow(path);
+            localStorage.setItem(prefix+path, JSON.stringify(value));
           }
+          return value;
         } else {
           return {};
         }
@@ -68,7 +72,7 @@ define(['./session'], function (session) {
       var obj = {};
       for(var i=0; i<localStorage.length; i++) {
         var key = localStorage.key(i);
-        if(key.substr(0,prefix.length+path.length)==prefix+path) {
+        if(key.length > prefix.length+path.length && key.substr(0, prefix.length+path.length)==prefix+path) {
           obj[getFileName(key)]=getCurrTimestamp();
         }
       }
@@ -132,7 +136,7 @@ define(['./session'], function (session) {
     function removePublic(path) {
       remove('public/'+moduleName+'/'+path);
     }
-    function remove(path) {
+    function remove(absPath) {
       session.notifyRemove(absPath, function(err) {
         if(err) {
           fire('error', err);

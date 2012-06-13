@@ -23,20 +23,28 @@ function TasksModule(baseClient) {
       return myArray;
     }
     function get(id) {
-      baseClient.getPrivate(listName+'/'+id);
+      var valueStr = baseClient.getPrivate(listName+'/'+id);
+      if(valueStr) {
+        try {
+          return JSON.parse(valueStr);
+        } catch(e) {
+          fire('error', e);
+        }
+      }
+      return undefined;
     }
-    function set(id, obj, silent) {
-      baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj), silent);
+    function set(id, obj) {
+      baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj));
     }
-    function add(text, silent) {
+    function add(title) {
       var id = getUuid();
       baseClient.setPrivate(listName+'/'+id, JSON.stringify({
-        text: text,
+        title: title,
         completed: false
-      }), silent);
+      }));
       return id;
     }
-    function markCompleted(id, completedVal, silent) {
+    function markCompleted(id, completedVal) {
       if(typeof(completedVal) == 'undefined') {
         completedVal = true;
       }
@@ -46,21 +54,25 @@ function TasksModule(baseClient) {
           var obj = JSON.parse(objStr);
           if(obj && obj.completed != completedVal) {
             obj.completed = completedVal;
-            baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj), silent);
+            baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj));
           }
         } catch(e) {
         }
       }
     }
+    function isCompleted(id) {
+      var obj = get(id);
+      return obj && obj.completed;
+    }
     function getStats() {
+      var ids = getIds();
       var stat = {
-        todoLeft: getIds().length,
+        todoLeft: ids.length,
         todoCompleted: 0,
         totalTodo: 0
       };
-
       for (var i=0; i<stat.todoLeft; i++) {
-        if (todos[i].completed) {
+        if (isCompleted(ids[i])) {
           stat.todoCompleted += 1;
         }
       }
