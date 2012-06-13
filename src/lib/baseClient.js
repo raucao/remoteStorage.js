@@ -67,8 +67,8 @@ define(['./session'], function (session) {
     function rebuildNow(path) {
       var obj = {};
       for(var i=0; i<localStorage.length; i++) {
-        var key = localStorage.keys[i];
-        if(key.substr(0,prefix.length+path.length)=prefix+path) {
+        var key = localStorage.key(i);
+        if(key.substr(0,prefix.length+path.length)==prefix+path) {
           obj[getFileName(key)]=getCurrTimestamp();
         }
       }
@@ -89,7 +89,7 @@ define(['./session'], function (session) {
         currIndex = rebuildNow(containingDir);
       }
       currIndex[getFileName(path)] = getCurrTimestamp();
-      localStorage.setItem(prefix+containingDir, JSON.stringify(currIndex));
+      localStorage.setItem(prefix+containingDir+'/', JSON.stringify(currIndex));
       return localStorage.setItem(prefix+path, valueStr);
     }
     function cacheRemove(path) {
