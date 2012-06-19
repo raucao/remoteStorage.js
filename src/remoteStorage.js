@@ -1,8 +1,9 @@
 define(
   ['require', './lib/platform', './lib/couch', './lib/dav', './lib/simple', './lib/webfinger', './lib/hardcoded', './lib/widget',
-    './lib/baseClient', './lib/wireClient'],
-  function (require, platform, couch, dav, simple, webfinger, hardcoded, widget, baseClient, wireClient) {
+    './lib/baseClient', './lib/wireClient', './modules/tasks-0.1.js'],
+  function (require, platform, couch, dav, simple, webfinger, hardcoded, widget, baseClient, wireClient, tasksModule) {
     var modules = {
+        'tasks-0.1': tasksModule
       },
       defineModule = function(moduleName, version, module) {
         modules[moduleName+'-'+version] = module;
@@ -11,11 +12,7 @@ define(
         if(this[moduleName]) {
           return;
         }
-        if(version=='0.0' || typeof(version) == 'undefined') {
-          this[moduleName] = baseClient.create(moduleName);//will check for updates every minute, if wireClient is connected
-        } else {
-          this[moduleName] = modules[moduleName+'-'+version](baseClient.create(moduleName));//will check for updates every minute, if wireClient is connected
-        }
+        this[moduleName] = modules[moduleName+'-'+version].exports;
         if(mode != 'r') {
           mode='rw';
         }

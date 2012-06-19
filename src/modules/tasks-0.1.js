@@ -1,4 +1,4 @@
-function TasksModule(baseClient) {
+define(['../lib/baseClient'], function(baseClient) {
   var errorHandlers=[];
   function fire(eventType, eventObj) {
     if(eventType == 'error') {
@@ -22,16 +22,16 @@ function TasksModule(baseClient) {
     return uuid;
   }
   function getPrivateList(listName) {
-    baseClient.syncPrivate(listName+'/');
+    baseClient.connect('tasks/'+listName+'/', 60);
     function getIds() {
-      var myHashmap= baseClient.getPrivate(listName+'/'), myArray=[];
+      var myHashmap= baseClient.get('tasks/'+listName+'/'), myArray=[];
       for(var i in myHashmap) {
         myArray.push(i);
       }
       return myArray;
     }
     function get(id) {
-      var valueStr = baseClient.getPrivate(listName+'/'+id);
+      var valueStr = baseClient.get('tasks/'+listName+'/'+id);
       if(valueStr) {
         try {
           return JSON.parse(valueStr);
@@ -42,28 +42,28 @@ function TasksModule(baseClient) {
       return undefined;
     }
     function set(id, obj) {
-      baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj));
+      baseClient.storeObject('tasks/'+listName+'/'+id, 'tasks/task', obj);
     }
     function add(title) {
       var id = getUuid();
-      baseClient.setPrivate(listName+'/'+id, JSON.stringify({
+      baseClient.storeObject('tasks/'+listName+'/'+id, 'tasks/task', {
         id: id,
         title: title,
         completed: false
-      }));
+      });
       return id;
     }
     function markCompleted(id, completedVal) {
       if(typeof(completedVal) == 'undefined') {
         completedVal = true;
       }
-      var objStr = baseClient.getPrivate(listName+'/'+id);
+      var objStr = baseClient.get('tasks/'+listName+'/'+id);
       if(objStr) {
         try {
           var obj = JSON.parse(objStr);
           if(obj && obj.completed != completedVal) {
             obj.completed = completedVal;
-            baseClient.setPrivate(listName+'/'+id, JSON.stringify(obj));
+            baseClient.storeObject('tasks/'+listName+'/'+id, 'tasks/task', obj);
           }
         } catch(e) {
           fire('error', e);
@@ -89,7 +89,7 @@ function TasksModule(baseClient) {
       return stat;
     }
     function remove(id) {
-      baseClient.removePrivate(listName+'/'+id);
+      baseClient.remove('tasks/'+listName+'/'+id);
     }
     function on(eventType, cb) {
       baseClient.on(eventType, cb);
@@ -109,6 +109,23 @@ function TasksModule(baseClient) {
     };
   }
   return {
-    getPrivateList : getPrivateList
+    name: 'tasks',
+    version: '0.1',
+    hints: {
+      "": "tasks are things that need doing; items on your todo list",
+      "task": "something that needs doing, like cleaning the windows or fixing a specific bug in a program",
+      "task#title": "describes what it is that needs doing",
+      "task#completed": "whether the task has already been completed or not (yet)"
+    },
+    objectTypes: {
+      task : {
+        id: 'string',
+        title: 'string',
+        completed: 'boolean'
+      }
+    },
+    exports: {
+      getPrivateList: getPrivateList
+    }
   };
-}
+});

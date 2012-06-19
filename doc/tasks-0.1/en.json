@@ -1,6 +1,0 @@
-{
-  "tasks": "tasks are things that need doing; items on your todo list",
-  "tasks/task": "something that needs doing, like cleaning the windows or fixing a specific bug in a program",
-  "tasks/task#title": "describes what it is that needs doing",
-  "tasks/task#completed": "whether the task has already been completed or not (yet)"
-}
