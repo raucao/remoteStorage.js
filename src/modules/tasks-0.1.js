@@ -34,7 +34,9 @@ define(['../lib/baseClient'], function(baseClient) {
       var valueStr = baseClient.get('tasks/'+listName+'/'+id);
       if(valueStr) {
         try {
-          return JSON.parse(valueStr);
+          var obj = JSON.parse(valueStr);
+          obj.id = id;
+          return obj;
         } catch(e) {
           fire('error', e);
         }
@@ -47,7 +49,6 @@ define(['../lib/baseClient'], function(baseClient) {
     function add(title) {
       var id = getUuid();
       baseClient.storeObject('tasks/'+listName+'/'+id, 'tasks/task', {
-        id: id,
         title: title,
         completed: false
       });
@@ -110,20 +111,19 @@ define(['../lib/baseClient'], function(baseClient) {
   }
   return {
     name: 'tasks',
-    version: '0.1',
-    hints: {
-      "": "tasks are things that need doing; items on your todo list",
-      "task": "something that needs doing, like cleaning the windows or fixing a specific bug in a program",
-      "task#title": "describes what it is that needs doing",
-      "task#completed": "whether the task has already been completed or not (yet)"
+    dataVersion: '0.1',
+    dataHints: {
+      "module": "tasks are things that need doing; items on your todo list",
+      
+      "objectType task": "something that needs doing, like cleaning the windows or fixing a specific bug in a program",
+      "string task#title": "describes what it is that needs doing",
+      "boolean task#completed": "whether the task has already been completed or not (yet)",
+      
+      "directory tasks/todos/": "default private todo list",
+      "directory tasks/:year/": "tasks that need doing during year :year",
+      "directory public/tasks/:hash/": "tasks list shared to for instance a team"
     },
-    objectTypes: {
-      task : {
-        id: 'string',
-        title: 'string',
-        completed: 'boolean'
-      }
-    },
+    codeVersion: '0.1.0',
     exports: {
       getPrivateList: getPrivateList
     }
