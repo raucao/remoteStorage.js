@@ -216,8 +216,10 @@ define(['./session'], function (session) {
     return 'disconnected';
   }
   function storeObject(path, type, obj) {
+    set(path, JSON.stringify(obj));
   }
   function storeMedia(path, mimeType, data) {
+    set(path, data);
   }
   return {
     on: on,//error,change(origin=tab,device,cloud)
