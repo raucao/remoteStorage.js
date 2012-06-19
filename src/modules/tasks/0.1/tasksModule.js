@@ -47,6 +47,7 @@ function TasksModule(baseClient) {
     function add(title) {
       var id = getUuid();
       baseClient.setPrivate(listName+'/'+id, JSON.stringify({
+        id: id,
         title: title,
         completed: false
       }));
@@ -76,11 +77,10 @@ function TasksModule(baseClient) {
     function getStats() {
       var ids = getIds();
       var stat = {
-        todoLeft: ids.length,
         todoCompleted: 0,
-        totalTodo: 0
+        totalTodo: ids.length
       };
-      for (var i=0; i<stat.todoLeft; i++) {
+      for (var i=0; i<stat.totalTodo; i++) {
         if (isCompleted(ids[i])) {
           stat.todoCompleted += 1;
         }

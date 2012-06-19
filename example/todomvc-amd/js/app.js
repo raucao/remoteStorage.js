@@ -80,9 +80,9 @@ function windowLoadHandler() {
 
       function hrefClearClickHandler() {
           var ids = todos.getIds();
-          for(var i in ids) {
-              if ( todos.get(i).completed ) {
-                  todos.removeItem(i);
+          for(var i=0; i<ids.length; i++) {
+              if ( todos.get(ids[i]).completed ) {
+                  todos.remove(ids[i]);
               }
          }
       }
@@ -206,11 +206,11 @@ function windowLoadHandler() {
           document.getElementById( 'footer' ).style.display = stat.totalTodo ? 'block' : 'none';
 
           if ( stat.todoCompleted > 0 ) {
-              drawTodoClear();
+              drawTodoClear(stat);
           }
 
           if ( stat.totalTodo > 0 ) {
-              drawTodoCount();
+              drawTodoCount(stat);
           }
       }
 
