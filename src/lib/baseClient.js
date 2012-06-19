@@ -42,6 +42,8 @@ define(['./session'], function (session) {
             value = JSON.parse(valueStr);
           } catch(e) {
             fire('error', e);
+          }
+          if(!value) {
             value = rebuildNow(path);
             memCache[path]=JSON.stringify(value);
             localStorage.setItem(prefix+path, memCache[path]);
@@ -58,12 +60,21 @@ define(['./session'], function (session) {
       return path.substr(-1) == '/';
     }
     function getContainingDir(path) {
+      // '' 'a' 'a/' 'a/b' 'a/b/' 'a/b/c' 'a/b/c/'
       var parts = path.split('/');
-      if(isDir(path)) {
-        return parts.slice(0,parts.length-2).join('/')+'/';
-      } else {
-        return parts.slice(0,parts.length-1).join('/')+'/';
+      // [''] ['a'] ['a', ''] ['a', 'b'] ['a', 'b', ''] ['a', 'b', 'c'] ['a', 'b', 'c', ''] 
+      if(!parts[parts.length-1].length) {//last part is empty, so string was empty or had a trailing slash
+        parts.pop();
       }
+      // [] ['a'] ['a'] ['a', 'b'] ['a', 'b'] ['a', 'b', 'c'] ['a', 'b', 'c']
+      if(parts.length) {//remove the filename or dirname
+        parts.pop();
+        // - [] [] ['a'] ['a'] ['a', 'b'] ['a', 'b']
+        return parts.join('/')+(parts.length?'/':'');
+        // - '' '' 'a/' 'a/' 'a/b/' 'a/b/'
+      }
+      return undefined;
+      // undefined - - - - - -
     }
     function getFileName(path) {
       var parts = path.split('/');
@@ -93,25 +104,24 @@ define(['./session'], function (session) {
     }
     function cacheSet(path, valueStr) {
       var containingDir = getContainingDir(path);
-      var currIndexStr = memCache[containingDir] ? memCache[containingDir] : localStorage.getItem(prefix+containingDir);
-      var currIndex;
-      if(typeof(currIndexStr) == 'string') {
-        try {
-          currIndex = JSON.parse(currIndexStr);
-        } catch(e) {
-          fire('error', e);
-        }
+      if(containingDir) {
+        currIndex = cacheGet(containingDir);
+        currIndex[getFileName(path)] = getCurrTimestamp();
+        cacheSet(containingDir, JSON.stringify(currIndex));
       }
-      if(!currIndex) {
-        currIndex = rebuildNow(containingDir);
-      }
-      currIndex[getFileName(path)] = getCurrTimestamp();
-      memCache[containingDir] = JSON.stringify(currIndex);
-      localStorage.setItem(prefix+containingDir, memCache[containingDir+'/']);
       memCache[path] = valueStr;
       return localStorage.setItem(prefix+path, valueStr);
     }
     function cacheRemove(path) {
+      var containingDir = getContainingDir(path);
+      if(containingDir) {
+        var fileName = getFileName(path);
+        currIndex = cacheGet(containingDir);
+        if(currIndex[fileName]) {
+          delete currIndex[fileName];
+          cacheSet(containingDir, JSON.stringify(currIndex));
+        }
+      }
       memCache[path] = undefined;
       return localStorage.removeItem(prefix+path);
     }
