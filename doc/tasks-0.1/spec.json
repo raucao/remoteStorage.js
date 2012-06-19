@@ -1,8 +1,0 @@
-{
-  "@context": "https://www.w3.org/community/unhosted/wiki/spec/modulespecspec-0.1",
-  "@id": "https://remotestoragejs.com/tasks/0.1/spec.json",
-  "task": {
-    "title": "string",
-    "completed": "boolean"
-  }
-}
