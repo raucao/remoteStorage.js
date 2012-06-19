@@ -1,4 +1,10 @@
 //this is the base module. it is the basis for specific modules, and deals with coordinating the cache, events from other tabs, and all wire traffic with the cloud
+
+//baseModule:
+//- get, setObject(path, type, fields), setField(path, value), setMedia(path, mimeType, data), remove
+//- getHint(path)
+//- setModuleContext(context)
+
 define(['./session'], function (session) {
   function create(moduleName, syncInterval) {
     var handlers = { change: []},
