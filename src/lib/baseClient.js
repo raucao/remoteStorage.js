@@ -103,6 +103,9 @@ define(['./session'], function (session) {
     return obj;
   }
   function markOutgoingChange(path) {
+    if(path.substr(-1)=='/') {
+      return;
+    }
     var list = {},
       existingListStr = localStorage.getItem(outgoingChangesKey);
     if(existingListStr) {
