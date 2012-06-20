@@ -9,6 +9,7 @@ define(['./session'], function (session) {
   var handlers = { change: []},
     prefix = 'remote_storage_cache:',
     outgoingChangesKey = 'remote_storage_outgoing',
+    pathsToSync = 'remote_storage_sync',
     now = new Date().getTime(),
     memCache = {};
   function fire(eventName, eventObj) {
@@ -103,9 +104,6 @@ define(['./session'], function (session) {
     return obj;
   }
   function markOutgoingChange(path) {
-    if(path.substr(-1)=='/') {
-      return;
-    }
     var list = {},
       existingListStr = localStorage.getItem(outgoingChangesKey);
     if(existingListStr) {
@@ -117,6 +115,26 @@ define(['./session'], function (session) {
     list[path]=getCurrTimestamp();
     localStorage.setItem(outgoingChangesKey, JSON.stringify(list));
   }
+  function connectPath(path, connect) {
+    var list = {},
+      existingListStr = localStorage.getItem(pathsToSyncKey);
+    if(existingListStr) {
+      try {
+        list = JSON.parse(existingListStr);
+      } catch(e) {
+      }
+    }
+    if(connect === false) {
+      for(var i in list) {
+        if(isPrefixOf(path, i)) {
+          delete list[i];
+        }
+      }
+    } else {
+      list[i] = true;
+    }
+    localStorage.setItem(pathsToSyncKey, JSON.stringify(list));
+  }
   function cacheSet(path, valueStr) {
     var containingDir = getContainingDir(path);
     if(containingDir) {
@@ -125,7 +143,6 @@ define(['./session'], function (session) {
       cacheSet(containingDir, JSON.stringify(currIndex));
     }
     memCache[path] = valueStr;
-    markOutgoingChange(path);
     return localStorage.setItem(prefix+path, valueStr);
   }
   function cacheRemove(path) {
@@ -150,11 +167,8 @@ define(['./session'], function (session) {
     return cacheGet(path);
   }
   function set(absPath, valueStr) {
-    session.notifySet(absPath, valueStr, function(err) {
-      if(err) {
-        fire('error', err);
-      }
-    });
+    markOutgoingChange(absPath);
+    session.work();
     var ret = cacheSet(absPath, valueStr);
     fire('change', {
       origin: 'tab',
@@ -164,18 +178,9 @@ define(['./session'], function (session) {
     });
     return ret; 
   }
-  function removePrivate(path) {
-    remove(moduleName+'/'+path);
-  }
-  function removePublic(path) {
-    remove('public/'+moduleName+'/'+path);
-  }
   function remove(absPath) {
-    session.notifyRemove(absPath, function(err) {
-      if(err) {
-        fire('error', err);
-      }
-    });
+    markOutgoingChange(absPath);
+    session.work();
     var ret = cacheRemove(absPath);
     fire('change', {
       origin: 'tab',
@@ -185,49 +190,9 @@ define(['./session'], function (session) {
     });
     return ret;
   }
-  function push(path) {
-    if(isDir(path)) {
-      doSync(path);
-    } else {
-      session.notifySet(path, cacheGet(path));
-    }
-  }
-  function pull(path) {
-    if(isDir(key)) {
-      sync(path);
-    } else {
-      session.getRemote(path, function(err, data) {
-        if(err) {
-          fire('error', err);
-        } else {
-          cacheSet(path, data);
-        }
-      });
-    }
-  }
-  function doMerge(path, localIndex, remoteIndex) {
-    for(var key in localIndex) {
-      if(localIndex[key] > remoteIndex[key]) {
-        push(path+'/'+key);
-      }
-    }
-    for(var key in remoteIndex) {
-      if(remoteIndex[key] > localIndex[key]) {
-        pull(path+'/'+key);
-      }
-    }
-  }
-  function doSync(path) {
-    session.remoteGet(path, function(err, data) {
-      if(err) {
-        fire('error', err);
-      } else {
-        doMerge(path, cacheGet(path), data);
-      }
-    });
-  }
-  function connect(path, syncInterval) {
-    doSync(path);
+  function connect(path, connectVal) {
+    doConnect(path, connectVal);
+    session.work();
   }
   function getState(path) {
     return 'disconnected';
