@@ -8,6 +8,7 @@
 define(['./session'], function (session) {
   var handlers = { change: []},
     prefix = 'remote_storage_cache:',
+    outgoingChangesKey = 'remote_storage_outgoing',
     now = new Date().getTime(),
     memCache = {};
   function fire(eventName, eventObj) {
@@ -101,6 +102,18 @@ define(['./session'], function (session) {
     }
     return obj;
   }
+  function markOutgoingChange(path) {
+    var list = {},
+      existingListStr = localStorage.getItem(outgoingChangesKey);
+    if(existingListStr) {
+      try {
+        list = JSON.parse(existingListStr);
+      } catch(e) {
+      }
+    }
+    list[path]=getCurrTimestamp();
+    localStorage.setItem(outgoingChangesKey, JSON.stringify(list));
+  }
   function cacheSet(path, valueStr) {
     var containingDir = getContainingDir(path);
     if(containingDir) {
@@ -109,6 +122,7 @@ define(['./session'], function (session) {
       cacheSet(containingDir, JSON.stringify(currIndex));
     }
     memCache[path] = valueStr;
+    markOutgoingChange(path);
     return localStorage.setItem(prefix+path, valueStr);
   }
   function cacheRemove(path) {
