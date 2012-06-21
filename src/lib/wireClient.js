@@ -14,8 +14,8 @@
 //                cache 
 
 define(
-  ['require', './platform', './couch', './dav', './simple'],
-  function (require, platform, couch, dav, simple) {
+  ['require', './platform', './couch', './dav', './getputdelete'],
+  function (require, platform, couch, dav, getputdelete) {
     var getDriver = function (type, cb) {
         if(type === 'https://www.w3.org/community/rww/wiki/read-write-web-00#couchdb'
           || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#couchdb') {
@@ -24,7 +24,7 @@ define(
           || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#webdav') {
           cb(dav);
         } else {
-          cb(simple);
+          cb(getputdelete);
         }
       },
       resolveKey = function(storageInfo, basePath, relPath, nodirs) {
@@ -34,41 +34,28 @@ define(
           + (storageInfo.properties.legacySuffix ? storageInfo.properties.legacySuffix : '')
           + '/' + (item[0] == '_' ? 'u' : '') + item;
       },
-      create = function (storageInfo, basePath, token) {
+      create = function (storageInfo, token) {
         return {
-          get: function (key, cb) {
-            if(typeof(key) != 'string') {
-              cb('argument "key" should be a string');
+          get: function (path, cb) {
+            if(typeof(path) != 'string') {
+              cb('argument "path" should be a string');
             } else {
               getDriver(storageInfo.type, function (d) {
-                d.get(resolveKey(storageInfo, basePath, key, storageInfo.nodirs), token, cb);
+                d.get(resolveKey(storageInfo, '', path, storageInfo.nodirs), token, cb);
               });
             }
           },
-          put: function (key, value, cb) {
-            if(typeof(key) != 'string') {
-              cb('argument "key" should be a string');
-            } else if(typeof(value) != 'string') {
-              cb('argument "value" should be a string');
+          set: function (path, valueStr, cb) {
+            if(typeof(path) != 'string') {
+              cb('argument "path" should be a string');
+            } else if(typeof(valueStr) != 'string') {
+              cb('argument "valueStr" should be a string');
             } else {
               getDriver(storageInfo.type, function (d) {
-                d.put(resolveKey(storageInfo, basePath, key, storageInfo.nodirs), value, token, cb);
+                d.set(resolveKey(storageInfo, '', path, storageInfo.nodirs), value, token, cb);
               });
             }
           },
-          'delete': function (key, cb) {
-            if(typeof(key) != 'string') {
-              cb('argument "key" should be a string');
-            } else {
-              getDriver(storageInfo.type, function (d) {
-                d['delete'](resolveKey(storageInfo, basePath, key, storageInfo.nodirs), token, cb);
-              });
-            }
-          },
-          sync: function (path) {
-          },
-          on: function(eventName, handler) {
-          }
         };
       };
 

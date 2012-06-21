@@ -55,13 +55,16 @@ define(
       });
     }
 
-    function delete_(url, token, cb) {
-      doCall('DELETE', url, null, token, cb);
+    function set(url, valueStr, token, cb) {
+      if(typeof(valueStr) == 'undefined') {
+        doCall('DELETE', url, null, token, cb);
+      } else {
+        put(url, valueStr, token, cb);
+      }
     }
 
     return {
       get:    get,
-      put:    put,
-      delete: delete_
+      set:    set
     }
 });
