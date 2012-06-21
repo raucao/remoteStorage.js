@@ -1,5 +1,5 @@
 define(['../lib/baseClient'], function(baseClient) {
-  var errorHandlers=[];
+  var errorHandlers=[], myBaseClient = baseClient.getInstance('tasks');
   function fire(eventType, eventObj) {
     if(eventType == 'error') {
       for(var i=0; i<errorHandlers.length; i++) {
@@ -22,16 +22,16 @@ define(['../lib/baseClient'], function(baseClient) {
     return uuid;
   }
   function getPrivateList(listName) {
-    baseClient.connect('tasks/'+listName+'/', 60);
+    myBaseClient.connect(listName);
     function getIds() {
-      var myHashmap= baseClient.get('tasks/'+listName+'/'), myArray=[];
+      var myHashmap= myBaseClient.get(listName+'/'), myArray=[];
       for(var i in myHashmap) {
         myArray.push(i);
       }
       return myArray;
     }
     function get(id) {
-      var valueStr = baseClient.get('tasks/'+listName+'/'+id);
+      var valueStr = myBaseClient.get(listName+'/'+id);
       if(valueStr) {
         try {
           var obj = JSON.parse(valueStr);
@@ -44,11 +44,11 @@ define(['../lib/baseClient'], function(baseClient) {
       return undefined;
     }
     function set(id, obj) {
-      baseClient.storeObject('tasks/'+listName+'/'+id, 'tasks/task', obj);
+      myBaseClient.storeObject(listName+'/'+id, false, 'tasks/task', obj);
     }
     function add(title) {
       var id = getUuid();
-      baseClient.storeObject('tasks/'+listName+'/'+id, 'tasks/task', {
+      myBaseClient.storeObject(listName+'/'+id, false, 'tasks/task', {
         title: title,
         completed: false
       });
@@ -58,13 +58,13 @@ define(['../lib/baseClient'], function(baseClient) {
       if(typeof(completedVal) == 'undefined') {
         completedVal = true;
       }
-      var objStr = baseClient.get('tasks/'+listName+'/'+id);
+      var objStr = myBaseClient.get(listName+'/'+id);
       if(objStr) {
         try {
           var obj = JSON.parse(objStr);
           if(obj && obj.completed != completedVal) {
             obj.completed = completedVal;
-            baseClient.storeObject('tasks/'+listName+'/'+id, 'tasks/task', obj);
+            myBaseClient.storeObject(listName+'/'+id, false, 'tasks/task', obj);
           }
         } catch(e) {
           fire('error', e);
@@ -90,10 +90,10 @@ define(['../lib/baseClient'], function(baseClient) {
       return stat;
     }
     function remove(id) {
-      baseClient.remove('tasks/'+listName+'/'+id);
+      myBaseClient.remove(listName+'/'+id);
     }
     function on(eventType, cb) {
-      baseClient.on(eventType, cb);
+      myBaseClient.on(eventType, cb);
       if(eventType == 'error') {
         errorHandlers.push(cb);
       }
