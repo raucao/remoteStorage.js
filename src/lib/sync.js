@@ -1,4 +1,4 @@
-define(['./wireClient', './webfinger', './hardcoded'], function(wireClient, webfinger, hardcoded) {
+define(['./wireClient', './session', './cache'], function(wireClient, session, cache) {
   var prefix = '_remoteStorage_';
   function addToList(list, path, value) {
     var list, listStr = localStorage.getItem(prefix+list);
