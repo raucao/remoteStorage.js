@@ -22,6 +22,9 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
   function getUserAddress() {
     return null;
   }
+  function getCurrentTimestamp() {
+    return new Date().getTime();
+  }
   function get(path, cb) {
     var fromCache = store.get(path);
     if(fromCache) {
@@ -30,7 +33,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
       wireClient.get(path, function(err, data) {
         if(getStatus(path) != 'disconnected') {
           store.set(path, data);
-          addToList('pull', path, getCurrTimeStamp());
+          addToList('pull', path, getCurrentTimeStamp());
         }
         cb(err, data);
       });
