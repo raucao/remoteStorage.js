@@ -10,7 +10,7 @@ define(['./sync', './cache'], function (sync, cache) {
       }
     }
   }
-  cache.on('change', function(e) {
+  cache.on('change', function(e) {//tab-, device- and cloud-based changes all get fired from the cache.
     var moduleName = extractModuleName(e.path);
     if(moduleName && moduleChangeHandlers[moduleName]) {
       moduleChangeHandlers[moduleName](eventObj);

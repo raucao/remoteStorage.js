@@ -1,41 +1,24 @@
-//this is the base module. it is the basis for specific modules, and deals with coordinating the cache, events from other tabs, and all wire traffic with the cloud
-
-//baseModule:
-//- get, setObject(path, type, fields), setField(path, value), setMedia(path, mimeType, data), remove
-//- getHint(path)
-//- setModuleContext(context)
-
-define(['./sync'], function (sync) {
-  var handlers = { change: []},
+define([], function () {
+  var onChange,
     prefix = 'remote_storage_cache:',
-    outgoingChangesKey = 'remote_storage_outgoing',
-    pathsToSync = 'remote_storage_sync',
-    now = new Date().getTime(),
     memCache = {};
-  function fire(eventName, eventObj) {
-    if(handlers[eventName]) {
-      for(var i=0; i<handlers[eventName].length; i++) {
-        handlers[eventName][i](eventObj);
-      }
-    }
-  }
-  function forThisModule(e) {
-    return (e && e.path && typeof(e.path) == 'string' && (
-      e.path.substring(0, moduleName.length+1) == moduleName+'/'
-      ||e.path.substring(0, 'public/'.length+moduleName.length+1) == 'public/'+moduleName+'/'
-    ));
-  }
   window.addEventListener('storage', function(e) {
     if(e.key.substring(0, prefix.length == prefix)) {
       e.path = e.key.substring(prefix.length);
       e.origin='device';
-    }
-    if(forThisModule(e)) {
-      fire(e);
+      if(memCache[path]) {//should use null for negative caching!
+        delete memCache[path];
+      }
+      if(onChange) {
+        onChange(e);
+      }
     }
   });
   function cacheGet(path) {
-    var valueStr = memCache[path] ? memCache[path] : localStorage.getItem(prefix+path);
+    var valueStr = memCache[path];
+    if(typeof(valueStr) == 'undefined') {//null is used for negative caching!
+      valueStr = memCache[path] = localStorage.getItem(prefix+path);
+    }
     if(isDir(path)) {
       if(valueStr) {
         var value;
@@ -86,7 +69,7 @@ define(['./sync'], function (sync) {
     }
   }
   function getCurrTimestamp() {
-    return now;
+    return new Date().getTime();
   }
   function rebuildNow(path) {
     var obj = {};
@@ -103,39 +86,10 @@ define(['./sync'], function (sync) {
     }
     return obj;
   }
-  function markOutgoingChange(path) {
-    var list = {},
-      existingListStr = localStorage.getItem(outgoingChangesKey);
-    if(existingListStr) {
-      try {
-        list = JSON.parse(existingListStr);
-      } catch(e) {
-      }
-    }
-    list[path]=getCurrTimestamp();
-    localStorage.setItem(outgoingChangesKey, JSON.stringify(list));
-  }
-  function connectPath(path, connect) {
-    var list = {},
-      existingListStr = localStorage.getItem(pathsToSyncKey);
-    if(existingListStr) {
-      try {
-        list = JSON.parse(existingListStr);
-      } catch(e) {
-      }
-    }
-    if(connect === false) {
-      for(var i in list) {
-        if(isPrefixOf(path, i)) {
-          delete list[i];
-        }
-      }
-    } else {
-      list[i] = true;
-    }
-    localStorage.setItem(pathsToSyncKey, JSON.stringify(list));
-  }
   function cacheSet(path, valueStr) {
+    if(typeof(valueStr) == 'undefined') {
+      return cacheRemove(path);
+    }
     var containingDir = getContainingDir(path);
     if(containingDir) {
       currIndex = cacheGet(containingDir);
@@ -143,7 +97,7 @@ define(['./sync'], function (sync) {
       cacheSet(containingDir, JSON.stringify(currIndex));
     }
     memCache[path] = valueStr;
-    return localStorage.setItem(prefix+path, valueStr);
+    localStorage.setItem(prefix+path, valueStr);
   }
   function cacheRemove(path) {
     var containingDir = getContainingDir(path);
@@ -155,16 +109,13 @@ define(['./sync'], function (sync) {
         cacheSet(containingDir, JSON.stringify(currIndex));
       }
     }
-    memCache[path] = undefined;
-    return localStorage.removeItem(prefix+path);
+    memCache[path] = null;//negative caching
+    localStorage.removeItem(prefix+path);
   }
   function on(eventName, cb) {
     if(eventName=='change') {
-      handlers.change.push(cb);
+      onChange = cb;
     }
-  }
-  function get(path) {
-    return cacheGet(path);
   }
   function set(absPath, valueStr) {
     var ret = cacheSet(absPath, valueStr);
@@ -174,8 +125,6 @@ define(['./sync'], function (sync) {
       oldValue: cacheGet(absPath),
       newValue: valueStr
     });
-    sync.markOutgoingChange(absPath);
-    sync.work();
     return ret; 
   }
   function remove(absPath) {
