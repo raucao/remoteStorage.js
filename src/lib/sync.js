@@ -1,4 +1,4 @@
-define(['./wireClient', './session', './cache'], function(wireClient, session, cache) {
+define(['./wireClient', './session', './store'], function(wireClient, session, store) {
   var prefix = '_remoteStorage_';
   function addToList(list, path, value) {
     var list, listStr = localStorage.getItem(prefix+list);
@@ -23,13 +23,13 @@ define(['./wireClient', './session', './cache'], function(wireClient, session, c
     return null;
   }
   function get(path, cb) {
-    var fromCache = cache.get(path);
+    var fromCache = store.get(path);
     if(fromCache) {
       cb(null, fromCache);
     } else {
       wireClient.get(path, function(err, data) {
         if(getStatus(path) != 'disconnected') {
-          cache.set(path, data);
+          store.set(path, data);
           addToList('pull', path, getCurrTimeStamp());
         }
         cb(err, data);
