@@ -1,7 +1,7 @@
 define(
-  ['require', './lib/platform', './lib/couch', './lib/dav', './lib/simple', './lib/webfinger', './lib/hardcoded', './lib/widget',
+  ['require', './lib/platform', './lib/couch', './lib/dav', './lib/getputdelete', './lib/webfinger', './lib/hardcoded', './lib/widget',
     './lib/baseClient', './lib/wireClient', './modules/tasks-0.1.js'],
-  function (require, platform, couch, dav, simple, webfinger, hardcoded, widget, baseClient, wireClient, tasksModule) {
+  function (require, platform, couch, dav, getputdelete, webfinger, hardcoded, widget, baseClient, wireClient, tasksModule) {
     var modules = {
         'tasks-0.1': tasksModule
       },

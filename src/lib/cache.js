@@ -14,7 +14,7 @@ define([], function () {
       }
     }
   });
-  function cacheGet(path) {
+  function get(path) {
     var valueStr = memCache[path];
     if(typeof(valueStr) == 'undefined') {//null is used for negative caching!
       valueStr = memCache[path] = localStorage.getItem(prefix+path);
@@ -92,7 +92,7 @@ define([], function () {
     }
     var containingDir = getContainingDir(path);
     if(containingDir) {
-      currIndex = cacheGet(containingDir);
+      currIndex = get(containingDir);
       currIndex[getFileName(path)] = getCurrTimestamp();
       cacheSet(containingDir, JSON.stringify(currIndex));
     }
@@ -103,7 +103,7 @@ define([], function () {
     var containingDir = getContainingDir(path);
     if(containingDir) {
       var fileName = getFileName(path);
-      currIndex = cacheGet(containingDir);
+      currIndex = get(containingDir);
       if(currIndex[fileName]) {
         delete currIndex[fileName];
         cacheSet(containingDir, JSON.stringify(currIndex));
@@ -122,7 +122,7 @@ define([], function () {
     fire('change', {
       origin: 'tab',
       path: absPath,
-      oldValue: cacheGet(absPath),
+      oldValue: get(absPath),
       newValue: valueStr
     });
     return ret; 

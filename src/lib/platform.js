@@ -141,10 +141,10 @@ define([], function() {
     new xml2js.Parser().parseString(str, cb);
   }
 
-  function getFragmentParamsNode() {
+  function harvestTokenNode() {
     return [];
   }
-  function getFragmentParamsBrowser() {
+  function harvestTokenBrowser() {
     if(location.hash.length) {
       return location.hash.substring(1).split('&');
     } else {
@@ -156,20 +156,20 @@ define([], function() {
     return {
       ajax: ajaxNode,
       parseXml: parseXmlNode,
-      getFragmentParams: getFragmentParamsNode
+      harvestToken: harvestTokenNode
     }
   } else {
     if(window.XDomainRequest) {
       return {
         ajax: ajaxExplorer,
         parseXml: parseXmlBrowser,
-        getFragmentParams: getFragmentParamsBrowser
+        harvestToken: harvestTokenBrowser
       };
     } else {
       return {
         ajax: ajaxBrowser,
         parseXml: parseXmlBrowser,
-        getFragmentParams: getFragmentParamsBrowser
+        harvestToken: harvestTokenBrowser
       };
     }
   }
