@@ -54,7 +54,7 @@ function windowLoadHandler() {
 
           inputEditTodo = event.target;
           todoId = event.target.id.slice( 6 );
-          editTodo( todoId, inputEditTodo.value );
+          todos.set( todoId, inputEditTodo.value.trim() );
       }
 
       function newTodoKeyPressHandler( event ) {

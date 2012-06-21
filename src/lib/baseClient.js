@@ -3,15 +3,15 @@ define(['./sync', './store'], function (sync, store) {
   function extractModuleName(path) {
     if (path && typeof(path) == 'string') {
       var parts = path.split('/');
-      if(parts.length > 2 && parts[0] == 'public') {
+      if(parts.length > 3 && parts[1] == 'public') {
+        return parts[2];
+      } else if(parts.length > 2){
         return parts[1];
-      } else if(parts.length > 1){
-        return parts[0];
       }
     }
   }
-  store.on('change', function(e) {//tab-, device- and cloud-based changes all get fired from the store.
-    var moduleName = extractModuleName(e.path);
+  store.on('change', function(eventObj) {//tab-, device- and cloud-based changes all get fired from the store.
+    var moduleName = extractModuleName(eventObj.path);
     if(moduleName && moduleChangeHandlers[moduleName]) {
       moduleChangeHandlers[moduleName](eventObj);
     }
@@ -49,7 +49,9 @@ define(['./sync', './store'], function (sync, store) {
           return set(makePath(moduleName, path, public), undefined);
         },
         
-        storeObject : function(path, public, obj) {
+        storeObject : function(path, public, type, obj) {
+          obj['@type'] = 'https://remotestoragejs.com/spec/modules/'+type;
+          //checkFields(obj);
           return set(makePath(moduleName, path, public), JSON.stringify(obj));
         },
         storeMedia  : function(path, mimeType, data) {
