@@ -1,4 +1,4 @@
-define(['./sync', './cache'], function (sync, cache) {
+define(['./sync', './store'], function (sync, store) {
   var moduleChangeHandlers = {};
   function extractModuleName(path) {
     if (path && typeof(path) == 'string') {
@@ -10,20 +10,14 @@ define(['./sync', './cache'], function (sync, cache) {
       }
     }
   }
-  cache.on('change', function(e) {//tab-, device- and cloud-based changes all get fired from the cache.
+  store.on('change', function(e) {//tab-, device- and cloud-based changes all get fired from the store.
     var moduleName = extractModuleName(e.path);
     if(moduleName && moduleChangeHandlers[moduleName]) {
       moduleChangeHandlers[moduleName](eventObj);
     }
   });
   function set(absPath, valueStr) {
-    var ret = cache.set(absPath, valueStr);
-    fire('change', {
-      origin: 'tab',
-      path: absPath,
-      oldValue: cache.get(absPath),
-      newValue: valueStr
-    });
+    var ret = store.set(absPath, valueStr);
     sync.markOutgoingChange(absPath);
     return ret; 
   }
@@ -48,7 +42,7 @@ define(['./sync', './cache'], function (sync, cache) {
           if(cb) {
             return sync.get(makePath(moduleName, path, public, userAddress), cb);
           } else {
-            return cache.get(makePath(moduleName, path, public, userAddress));
+            return store.get(makePath(moduleName, path, public, userAddress));
           }
         },
         remove      : function(path, public) {

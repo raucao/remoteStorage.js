@@ -1,6 +1,6 @@
 define([], function () {
   var onChange,
-    prefix = 'remote_storage_cache:',
+    prefix = 'remote_storage_store:',
     memCache = {};
   window.addEventListener('storage', function(e) {
     if(e.key.substring(0, prefix.length == prefix)) {
@@ -25,7 +25,6 @@ define([], function () {
         try {
           value = JSON.parse(valueStr);
         } catch(e) {
-          fire('error', e);
         }
         if(!value) {
           value = rebuildNow(path);
@@ -86,27 +85,27 @@ define([], function () {
     }
     return obj;
   }
-  function cacheSet(path, valueStr) {
+  function storeSet(path, valueStr) {
     if(typeof(valueStr) == 'undefined') {
-      return cacheRemove(path);
+      return storeRemove(path);
     }
     var containingDir = getContainingDir(path);
     if(containingDir) {
       currIndex = get(containingDir);
       currIndex[getFileName(path)] = getCurrTimestamp();
-      cacheSet(containingDir, JSON.stringify(currIndex));
+      storeSet(containingDir, JSON.stringify(currIndex));
     }
     memCache[path] = valueStr;
     localStorage.setItem(prefix+path, valueStr);
   }
-  function cacheRemove(path) {
+  function storeRemove(path) {
     var containingDir = getContainingDir(path);
     if(containingDir) {
       var fileName = getFileName(path);
       currIndex = get(containingDir);
       if(currIndex[fileName]) {
         delete currIndex[fileName];
-        cacheSet(containingDir, JSON.stringify(currIndex));
+        storeSet(containingDir, JSON.stringify(currIndex));
       }
     }
     memCache[path] = null;//negative caching
@@ -118,8 +117,8 @@ define([], function () {
     }
   }
   function set(absPath, valueStr) {
-    var ret = cacheSet(absPath, valueStr);
-    fire('change', {
+    var ret = storeSet(absPath, valueStr);
+    onChange({
       origin: 'tab',
       path: absPath,
       oldValue: get(absPath),
@@ -147,12 +146,6 @@ define([], function () {
     on: on,//error,change(origin=tab,device,cloud)
     
     get      : get,
-    remove   : remove,
-    
-    storeObject : storeObject,
-    storeMedia : storeMedia,
-    
-    connect  : connect,
-    getState : getState
+    set      : set
   };
 });
