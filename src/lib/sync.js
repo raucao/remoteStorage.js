@@ -39,6 +39,8 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
       });
     }
   }
+  function on(eventType, cb) {
+  }
   return {
     markOutgoingChange : function(path) {
       addToList('push', path, getCurrentTimestamp());
@@ -48,6 +50,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
     },
     getStatus : getStatus,
     getUserAddress : getUserAddress,
-    get : get
+    get : get,
+    on : on
   };
 });

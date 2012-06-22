@@ -153,25 +153,39 @@ define([], function() {
       }
     }
   }
-
+  function setElementHtmlNode(eltName, html) {
+  }
+  function setElementHtmlBrowser(eltName, html) {
+    document.getElementById(eltName).innerHTML = html;
+  }
+  function eltOnNode(eltName, cb) {
+  }
+  function eltOnBrowser(eltName, cb) {
+  }
   if(typeof(window) === 'undefined') {
     return {
       ajax: ajaxNode,
       parseXml: parseXmlNode,
-      harvestToken: harvestTokenNode
+      harvestToken: harvestTokenNode,
+      setElementHTML: setElementHtmlNode,
+      eltOn: eltOnNode
     }
   } else {
     if(window.XDomainRequest) {
       return {
         ajax: ajaxExplorer,
         parseXml: parseXmlBrowser,
-        harvestToken: harvestTokenBrowser
+        harvestToken: harvestTokenBrowser,
+        setElementHTML: setElementHtmlBrowser,
+        eltOn: eltOnBrowser
       };
     } else {
       return {
         ajax: ajaxBrowser,
         parseXml: parseXmlBrowser,
-        harvestToken: harvestTokenBrowser
+        harvestToken: harvestTokenBrowser,
+        setElementHTML: setElementHtmlBrowser,
+        eltOn: eltOnBrowser
       };
     }
   }

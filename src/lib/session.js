@@ -1,6 +1,7 @@
 define(['./platform', './webfinger', './hardcoded'], function(platform, webfinger, hardcoded) {
   var prefix = 'remoteStorage_session_',
-    memCache = {};
+    memCache = {},
+    scopes = [];
   function set(key, value) {
     localStorage.setItem(prefix+key, JSON.stringify(value));
     memCache[key]=value;
@@ -48,12 +49,23 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
       set('token', tokenHarvested);
     }
   }
+  function addScope(scope) {
+    scopes.push(scope);
+  }
+  function getState() {
+    return 'anonymous';
+  }
+  function on(eventType, cb) {
+  }
 
   onLoad();
   
   return {
     get   : get,
     set   : set,
-    dance : dance
+    discover : dance,
+    addScope : addScope,
+    getState : getState,
+    on : on
   }
 });
