@@ -84,11 +84,11 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       html;
     html = 
       '<style>'+widgetCss+'</style>'
-      + (showInput ? '<input type="text">' : '')
-      + (showRegister ? '<input type="submit" value="'+translate('Register')+'">' : '')
-      + (spin ? 'spin ' : 'still ')
-      + (showHover ? 'hover ' : '')
-      + (showConnect ? '<input type="submit" value="'+translate('Connect')+'">' : '');
+      + '<input type="text" id="remotestorage-useraddress"'+(showInput ? '':'style="display:none"') +'>'
+      + '<input type="submit" value="'+translate('Get an account')+'" id="remotestorage-get" '+(showRegister ? '':'style="display:none"')+' >'
+      + '<span id="remotestorage-icon">'+(spin ? 'spin ' : 'still ')+'</span>'
+      + '<span id="remotestorage-hover">'+(showHover ? 'hover ' : '')+'</span>'
+      + (showConnect ? '<input type="submit" value="'+translate('Connect')+'" id="remotestorage-button">' : '');
     platform.setElementHTML(connectElement, html);
       ('<input id="remotestorage-useraddress" type="text" placeholder="you@remotestorage" autofocus />'
       +'<input id="remotestorage-status" class="remotestorage-button" type="submit" value="loading &hellip;" disabled />'
@@ -98,24 +98,28 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       +'\'resizable,toolbar=yes,location=yes,scrollbars=yes,menubar=yes,'
       +'width=400,height=200,top=0,left=0\');">get an account</span>');
   }
-  function handleWidgetClickYes() {
+  function handleWidgetClickButton() {
+    console.log('handleWidgetClickButton');
   }
-  function handleWidgetClickNo() {
+  function handleWidgetClickGet() {
+    console.log('handleWidgetClickGet');
   }
-  function handleWidgetType() {
+  function handleWidgetTypeUserAddress() {
+    console.log('handleWidgetTypeUserAddress');
   }
   function handleWidgetHover() {
+    console.log('handleWidgetHover');
   }
   function display(setConnectElement, setLocale) {
     connectElement = setConnectElement;
     locale = setLocale;
     sync.on('state', setWidgetState);
     session.on('state', setWidgetState);
-    platform.eltOn('remotestorage-button', 'click', handleWidgetClickYes);
-    platform.eltOn('remotestorage-get', 'click', handleWidgetClickNo);
-    platform.eltOn(connectElement, 'hover', handleWidgetHover);
-    platform.eltOn('remotestorage-useraddres', 'type', handleWidgetType);
     displayWidgetState(getWidgetState());
+    platform.eltOn('remotestorage-button', 'click', handleWidgetClickButton);
+    platform.eltOn('remotestorage-get', 'click', handleWidgetClickGet);
+    platform.eltOn(connectElement, 'hover', handleWidgetHover);
+    platform.eltOn('remotestorage-useraddress', 'type', handleWidgetTypeUserAddress);
   }
 
   return {

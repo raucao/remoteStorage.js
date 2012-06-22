@@ -158,10 +158,18 @@ define([], function() {
   function setElementHtmlBrowser(eltName, html) {
     document.getElementById(eltName).innerHTML = html;
   }
-  function eltOnNode(eltName, cb) {
+  function eltOnNode(eltName, eventType, cb) {
   }
-  function eltOnBrowser(eltName, cb) {
+  function eltOnBrowser(eltName, eventType, cb) {
+    if(eventType == 'click') {
+      document.getElementById(eltName).onclick = cb;
+    } else if(eventType == 'hover') {
+      document.getElementById(eltName).onmouseover = cb;
+    } else if(eventType == 'type') {
+      document.getElementById(eltName).onkeyup = cb;
+    }
   }
+
   if(typeof(window) === 'undefined') {
     return {
       ajax: ajaxNode,
