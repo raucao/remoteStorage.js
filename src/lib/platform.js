@@ -142,13 +142,15 @@ define([], function() {
   }
 
   function harvestTokenNode() {
-    return [];
   }
   function harvestTokenBrowser() {
     if(location.hash.length) {
-      return location.hash.substring(1).split('&');
-    } else {
-      return [];
+      var pairs = location.hash.substring(1).split('&');
+      for(var i=0; i<pairs.length; i++) {
+        if(pairs[i].substring(0, 'access_token='.length) == 'access_token=') {
+          return pairs[i].substring('access_token='.length);
+        }
+      }
     }
   }
 
