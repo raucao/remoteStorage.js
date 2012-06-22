@@ -44,13 +44,11 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
   function isRegistering() {
     return localStorage.getItem('remote_storage_registering');
   }
-  function getWidgetState() {
-    if(widgetState) {
-      return widgetState;
-    }
-    if(typeof(widgetState) == 'undefined') {//page load
-      widgetState = calcWidgetStateOnLoad();
-      return widgetState;
+  function setRegistering(value) {
+    if(value===false) {
+      localStorage.removeItem('remote_storage_registering');
+    } else {
+      localStorage.setItem('remote_storage_registering', 'true');
     }
   }
   function calcWidgetStateOnLoad() {
@@ -71,6 +69,9 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       return sessionState;//'connecting' or 'anonymous'
     }
   }
+  function setWidgetStateOnLoad() {
+    setWidgetState(calcWidgetStateOnLoad());
+  }
   function setWidgetState(state) {
     widgetState = state;
     displayWidgetState(state);
@@ -84,27 +85,32 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       html;
     html = 
       '<style>'+widgetCss+'</style>'
-      + '<input type="text" id="remotestorage-useraddress"'+(showInput ? '':'style="display:none"') +'>'
+      +'<img id="remotestorage-icon" class="remotestorage-loading" src="'+remoteStorageIcon+'" style="width:60px;height:30px"/>'
+      + '<input type="text" id="remotestorage-useraddress" placeholder="you@remotestorage" autofocus '+(showInput ? '':'style="display:none"') +'>'
       + '<input type="submit" value="'+translate('Get an account')+'" id="remotestorage-get" '+(showRegister ? '':'style="display:none"')+' >'
       + '<span id="remotestorage-icon">'+(spin ? 'spin ' : 'still ')+'</span>'
       + '<span id="remotestorage-hover">'+(showHover ? 'hover ' : '')+'</span>'
       + (showConnect ? '<input type="submit" value="'+translate('Connect')+'" id="remotestorage-button">' : '');
     platform.setElementHTML(connectElement, html);
-      ('<input id="remotestorage-useraddress" type="text" placeholder="you@remotestorage" autofocus />'
-      +'<input id="remotestorage-status" class="remotestorage-button" type="submit" value="loading &hellip;" disabled />'
-      +'<img id="remotestorage-icon" class="remotestorage-loading" src="'+remoteStorageIcon+'" style="width:60px;height:30px"/>'
-      +'<span id="remotestorage-disconnect">Disconnect <strong></strong></span>'
-      +'<span id="remotestorage-get" class="remotestorage-button" onclick="window.open(\'http://unhosted.org/en/a/register.html\', \'Get your remote storage\','
-      +'\'resizable,toolbar=yes,location=yes,scrollbars=yes,menubar=yes,'
-      +'width=400,height=200,top=0,left=0\');">get an account</span>');
   }
   function handleWidgetClickButton() {
     console.log('handleWidgetClickButton');
   }
   function handleWidgetClickGet() {
-    console.log('handleWidgetClickGet');
+    setRegistering();
+    var win = window.open('http://unhosted.org/en/a/register.html', 'Get your remote storage',
+      'resizable,toolbar=yes,location=yes,scrollbars=yes,menubar=yes,'
+      +'width=400,height=200,top=0,left=0');
+    //var timer = setInterval(function() { 
+    //  if(win.closed) {
+    //    clearInterval(timer);
+    //    setRegistering(false);
+    //  }
+    //}, 250);
+    setWidgetState('registering');
   }
   function handleWidgetTypeUserAddress() {
+    setRegistering(false);
     console.log('handleWidgetTypeUserAddress');
   }
   function handleWidgetHover() {
@@ -115,7 +121,7 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
     locale = setLocale;
     sync.on('state', setWidgetState);
     session.on('state', setWidgetState);
-    displayWidgetState(getWidgetState());
+    setWidgetStateOnLoad();
     platform.eltOn('remotestorage-button', 'click', handleWidgetClickButton);
     platform.eltOn('remotestorage-get', 'click', handleWidgetClickGet);
     platform.eltOn(connectElement, 'hover', handleWidgetHover);
