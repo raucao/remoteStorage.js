@@ -158,6 +158,11 @@ define([], function() {
   function setElementHtmlBrowser(eltName, html) {
     document.getElementById(eltName).innerHTML = html;
   }
+  function getElementValueNode(eltName) {
+  }
+  function getElementValueBrowser(eltName) {
+    return document.getElementById(eltName).value;
+  }
   function eltOnNode(eltName, eventType, cb) {
   }
   function eltOnBrowser(eltName, eventType, cb) {
@@ -169,14 +174,20 @@ define([], function() {
       document.getElementById(eltName).onkeyup = cb;
     }
   }
-
+  function setLocationBrowser(location) {
+    window.location = location;
+  }
+  function setLocationNode() {
+  }
   if(typeof(window) === 'undefined') {
     return {
       ajax: ajaxNode,
       parseXml: parseXmlNode,
       harvestToken: harvestTokenNode,
       setElementHTML: setElementHtmlNode,
-      eltOn: eltOnNode
+      getElementValue: getElementValueNode,
+      eltOn: eltOnNode,
+        setLocation: setLocationNode
     }
   } else {
     if(window.XDomainRequest) {
@@ -185,7 +196,9 @@ define([], function() {
         parseXml: parseXmlBrowser,
         harvestToken: harvestTokenBrowser,
         setElementHTML: setElementHtmlBrowser,
-        eltOn: eltOnBrowser
+        getElementValue: getElementValueBrowser,
+        eltOn: eltOnBrowser,
+        setLocation: setLocationBrowser
       };
     } else {
       return {
@@ -193,7 +206,9 @@ define([], function() {
         parseXml: parseXmlBrowser,
         harvestToken: harvestTokenBrowser,
         setElementHTML: setElementHtmlBrowser,
-        eltOn: eltOnBrowser
+        getElementValue: getElementValueBrowser,
+        eltOn: eltOnBrowser,
+        setLocation: setLocationBrowser
       };
     }
   }

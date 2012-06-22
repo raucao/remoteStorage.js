@@ -1,7 +1,8 @@
 define(['./platform', './webfinger', './hardcoded'], function(platform, webfinger, hardcoded) {
   var prefix = 'remoteStorage_session_',
     memCache = {},
-    scopes = [];
+    scopes = [],
+    stateHandler = function(){};
   function set(key, value) {
     localStorage.setItem(prefix+key, JSON.stringify(value));
     memCache[key]=value;
@@ -16,14 +17,14 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
           localStorage.removeItem(prefix+key);
           memCache[key] = null;
         }
+      } else {
+        memCache[key] = null;
       }
-    } else {
-      memCache[key] = null;
     }
     return memCache[key];
   }
   function discoverStorageInfo(cb) {
-    webfinger.getStorageInfo(get('userAddress'), function(err, data) {
+    webfinger.getStorageInfo(get('userAddress'), {}, function(err, data) {
       if(err) {
         hardcoded.guessStorageInfo(get('userAddress'), function(err2, data2) {
           if(err2) {
@@ -39,9 +40,19 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
       }
     });
   }
-  function dance(cb) {
+  function dance() {
     platform.setLocation(get('storageInfo').properties.authHref
       +'?scope='+encodeURIComponent(get('scopes')));
+  }
+  function setUserAddress(userAddress) {
+    set('userAddress', userAddress);
+    discoverStorageInfo(function(err) {
+      if(err) {
+        stateHandler('failed');
+      } else {
+        dance();
+      }
+    });
   }
   function onLoad() {
     var tokenHarvested = platform.harvestToken();
@@ -56,14 +67,15 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
     return 'anonymous';
   }
   function on(eventType, cb) {
+    if(eventType == 'state') {
+      stateHandler = cb;
+    }
   }
 
   onLoad();
   
   return {
-    get   : get,
-    set   : set,
-    discover : dance,
+    setUserAddress   : setUserAddress,
     addScope : addScope,
     getState : getState,
     on : on

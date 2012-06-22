@@ -12,14 +12,14 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       +'.remotestorage-button { margin:0; padding:.3em; font-size:14px; height:26px !important; background:#ddd; color:#333; border:1px solid #ccc; border-radius:3px; box-shadow:0 1px 1px #fff inset; }'
 
       +'#remotestorage-get { position:absolute; left:25px; top:8px; max-height:16px; text-decoration:none; font-weight:normal; }'
-      +'#remotestorage-useraddress { position:absolute; display:none; left:25px; top:8px; margin:0; padding:0 17px 0 3px; height:25px; width:142px; background:#eee; color:#333; border:0; border-radius:3px 0 0 3px; box-shadow:0 1px #fff, inset 0 1px #999; font-weight:normal; font-size:14px; }'
+      +'#remotestorage-useraddress { position:absolute; left:25px; top:8px; margin:0; padding:0 17px 0 3px; height:25px; width:142px; background:#eee; color:#333; border:0; border-radius:3px 0 0 3px; box-shadow:0 1px #fff, inset 0 1px #999; font-weight:normal; font-size:14px; }'
       +'#remotestorage-useraddress:hover, #remotestorage-useraddress:focus { background:#fff; color:#000; }'
       +'#remotestorage-icon { position:absolute; right:84px; -webkit-transition:right 500ms; -moz-transition:right 500ms; transition:right 500ms; z-index:99997; }'
       +'#remotestorage-status { position:absolute; right:8px; top:8px; padding:0 0 0 17px; width:90px; cursor:pointer; text-align:left; border-radius:0 3px 3px 0; font-weight:normal; }'
       +'#remotestorage-status:hover, #remotestorage-status:focus, .remotestorage-button:hover, .remotestorage-button:focus { background:#eee; color:#000; text-decoration:none; }'
 
       +'#remotestorage-info { position:absolute; left:0; padding:9px 8px; color:#fff; text-decoration:none; z-index:99999; font-weight:normal; }'
-      +'#remotestorage-infotext { display:none; position:absolute; left:0; top:0; width:255px; height:32px; padding:6px 5px 4px 25px; font-size:10px; background:black; color:white; border-radius:7px; opacity:.85; text-decoration:none; white-space:nowrap; z-index:99998; }'
+      +'#remotestorage-infotext { position:absolute; left:0; top:0; width:255px; height:32px; padding:6px 5px 4px 25px; font-size:10px; background:black; color:white; border-radius:7px; opacity:.85; text-decoration:none; white-space:nowrap; z-index:99998; }'
       +'#remotestorage-info:hover { color:#fff; }'
       +'#remotestorage-info:hover+#remotestorage-infotext { display:inline; }'
 
@@ -29,12 +29,10 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       +'    -o-animation-name:remotestorage-loading; -o-animation-duration:2s; -o-animation-iteration-count:infinite; -o-animation-timing-function:linear;'
       +'    -ms-animation-name:remotestorage-loading; -ms-animation-duration:2s; -ms-animation-iteration-count:infinite; -ms-animation-timing-function:linear; }'
 
-      +'#remotestorage-connect.remotestorage-connected #remotestorage-useraddress, #remotestorage-connect.remotestorage-connected #remotestorage-status, #remotestorage-connect.remotestorage-connected #remotestorage-info, #remotestorage-connect.remotestorage-connected #remotestorage-get { display:none !important; }'
       +'#remotestorage-connect.remotestorage-connected #remotestorage-icon { right:0; opacity:.5; cursor:pointer; }'
-      +'#remotestorage-disconnect { display:none; position:absolute; right:6px; top:9px; padding:5px 28px 2px 6px; height:17px; white-space:nowrap; font-size:10px; background:#000; color:#fff; border-radius:5px; opacity:.5; text-decoration:none; z-index:99996; }'
+      +'#remotestorage-disconnect { position:absolute; right:6px; top:9px; padding:5px 28px 2px 6px; height:17px; white-space:nowrap; font-size:10px; background:#000; color:#fff; border-radius:5px; opacity:.5; text-decoration:none; z-index:99996; }'
       +'#remotestorage-disconnect strong { font-weight:bold; }'
-      +'#remotestorage-connect.remotestorage-connected #remotestorage-icon:hover { opacity:1; }'
-      +'#remotestorage-connect.remotestorage-connected #remotestorage-icon:hover+#remotestorage-disconnect { display:inline; }',
+      +'#remotestorage-connect.remotestorage-connected #remotestorage-icon:hover { opacity:1; }',
     locale='en',
     connectElement,
     widgetState;
@@ -79,9 +77,9 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
   function displayWidgetState(state) {
     var spin = (state == 'unknown' || state == 'connecting' || state == 'busy'),
       showHover = (state == 'busyHover' || state == 'offlineHover' || state == 'connectedHover'),
-      showRegister = (state == 'anonymous' || state == 'failed' || state == 'registering' || state == 'interrupted'),
-      showConnect = (state == 'anonymous' || state == 'failed' || state == 'registering' || state == 'interrupted' || state == 'typing'),
-      showInput = (state == 'typing'),
+      showRegister = (state == 'anonymous' || state == 'failed' || state == 'interrupted'),
+      showConnect = (state == 'anonymous' || state == 'failed' || state == 'interrupted' || state == 'registering' || state == 'typing'),
+      showInput = (state == 'typing' || state == 'registering'),
       html;
     html = 
       '<style>'+widgetCss+'</style>'
@@ -92,9 +90,17 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       + '<span id="remotestorage-hover">'+(showHover ? 'hover ' : '')+'</span>'
       + (showConnect ? '<input type="submit" value="'+translate('Connect')+'" id="remotestorage-button">' : '');
     platform.setElementHTML(connectElement, html);
+    platform.eltOn('remotestorage-button', 'click', handleWidgetClickButton);
+    platform.eltOn('remotestorage-get', 'click', handleWidgetClickGet);
+    platform.eltOn(connectElement, 'hover', handleWidgetHover);
+    platform.eltOn('remotestorage-useraddress', 'type', handleWidgetTypeUserAddress);
   }
   function handleWidgetClickButton() {
-    console.log('handleWidgetClickButton');
+    if(widgetState == 'typing') {
+      session.setUserAddress(platform.getElementValue('remotestorage-useraddress'));
+    } else {
+      setWidgetState('typing');
+    }
   }
   function handleWidgetClickGet() {
     setRegistering();
@@ -122,10 +128,6 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
     sync.on('state', setWidgetState);
     session.on('state', setWidgetState);
     setWidgetStateOnLoad();
-    platform.eltOn('remotestorage-button', 'click', handleWidgetClickButton);
-    platform.eltOn('remotestorage-get', 'click', handleWidgetClickGet);
-    platform.eltOn(connectElement, 'hover', handleWidgetHover);
-    platform.eltOn('remotestorage-useraddress', 'type', handleWidgetTypeUserAddress);
   }
 
   return {
