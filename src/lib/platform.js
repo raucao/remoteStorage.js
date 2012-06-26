@@ -179,6 +179,12 @@ define([], function() {
   }
   function setLocationNode() {
   }
+  function alertBrowser(str) {
+    alert(str);
+  }
+  function alertNode(str) {
+    console.log(str);
+  }
   if(typeof(window) === 'undefined') {
     return {
       ajax: ajaxNode,
@@ -187,7 +193,8 @@ define([], function() {
       setElementHTML: setElementHtmlNode,
       getElementValue: getElementValueNode,
       eltOn: eltOnNode,
-        setLocation: setLocationNode
+      setLocation: setLocationNode,
+      alert: alertNode
     }
   } else {
     if(window.XDomainRequest) {
@@ -198,7 +205,8 @@ define([], function() {
         setElementHTML: setElementHtmlBrowser,
         getElementValue: getElementValueBrowser,
         eltOn: eltOnBrowser,
-        setLocation: setLocationBrowser
+        setLocation: setLocationBrowser,
+        alert: alertBrowser
       };
     } else {
       return {
@@ -208,7 +216,8 @@ define([], function() {
         setElementHTML: setElementHtmlBrowser,
         getElementValue: getElementValueBrowser,
         eltOn: eltOnBrowser,
-        setLocation: setLocationBrowser
+        setLocation: setLocationBrowser,
+        alert: alertBrowser
       };
     }
   }

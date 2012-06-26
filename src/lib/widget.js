@@ -126,6 +126,9 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
     connectElement = setConnectElement;
     locale = setLocale;
     sync.on('state', setWidgetState);
+    session.on('error', function(err) {
+      platform.alert(translate(err));
+    });
     session.on('state', setWidgetState);
     setWidgetStateOnLoad();
   }

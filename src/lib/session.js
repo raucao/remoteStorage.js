@@ -2,7 +2,8 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
   var prefix = 'remoteStorage_session_',
     memCache = {},
     scopes = [],
-    stateHandler = function(){};
+    stateHandler = function(){},
+    errorHandler = function(){};
   function set(key, value) {
     localStorage.setItem(prefix+key, JSON.stringify(value));
     memCache[key]=value;
@@ -26,7 +27,7 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
   function discoverStorageInfo(cb) {
     webfinger.getStorageInfo(get('userAddress'), {}, function(err, data) {
       if(err) {
-        hardcoded.guessStorageInfo(get('userAddress'), function(err2, data2) {
+        hardcoded.guessStorageInfo(get('userAddress'), {}, function(err2, data2) {
           if(err2) {
             cb(err2);
           } else {
@@ -48,6 +49,7 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
     set('userAddress', userAddress);
     discoverStorageInfo(function(err) {
       if(err) {
+        errorHandler(err);
         stateHandler('failed');
       } else {
         dance();
@@ -69,6 +71,8 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
   function on(eventType, cb) {
     if(eventType == 'state') {
       stateHandler = cb;
+    } else if(eventType == 'error') {
+      errorHandler = cb;
     }
   }
 
