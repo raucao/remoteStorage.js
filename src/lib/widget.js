@@ -7,23 +7,28 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       +'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',
     remoteStorageCube = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAR2SURBVFiFtddfqGVVHQfwz2/vfZ28c2WgP6hMoYkUV4qIYnSKmaQYwaaJ3oLeUnpJmDCmUhCaIhhKGelhelCqN9+ECKdAxR6kgnJASBN9KTGwP2oKTtyZs8/+9bDXPufcfe51xju6YLHX2fu3ft/v+q7fWb/fisy0o3brez6qmt4Luvo7frvx/E7cxNsmcCj2WGnuEb6JaXlbSz8zaX/ksXzj3SHwg6j8aeU28jjeh8TZ8nU3Aq8Sx+2b/ML3s3vnCHxp5YB0Hz6OTkgpMax2jxBSoMJfhGMemTx5aQQOxzWsnCC/gm6hZ+mvFMv36xUYCJQev2Jyt9P54tsj8OVYNW2+izuxIkzlAoGUQuLlMuNqKcQCgVBJNSa4X93+xK/zfxcmcLj5GtUJ8ipMC/i0gA/PQYF/lFkfHClQFxJ1IVET/6S72+n2oa0JHL7s0+RPsR9tAZuOxuNtGKS9xpL8A7BmNP4j8S2nzz+lGJaWDxB7RyCbV54DkZiSrbAhbJBt/25LtUbEY2+P1bdmQY1V8mr8DruET5Z9n4NHTOmmZK9A2ihzp3RdL3tVy+z16OeG0ElncI48yGzeogIzQgexByelp2fMZ+CDAtFK56XzxFwBXSE6C9incbL4PDha9BKBPrjCddJRVT5DHsMLczkLUGhFbPR9iJNYjJUXyGOqfEY6KlxnHrybVjwm0JVDJmV8FZ8TeZysZdyBK9FKXb/6mdTZ+4uXRXcKUxnHpavKdqV58G5JYJFdLvT3yuok3ROiuY3JZ3Rxu7CH7lxvHlPpNVX+nJU/yMk9VJ8nm5GvMc42W6Bwnhl2KRyQ7cOyaqy1R0ScEvFq6aestUdk1cj2YeEA3RwwtwbfSoHtxxmJXeS3nV25RR0/9KnJL8GZyz7i7MoD5MfQ9LZ5YZ+WY+AiW16vc8if/av8PkRevxNPiwTiLceRISPIM3iUOGxa/wfUbiTvxy3ETb3tRfi0HAMx+xgLY1XIeAUPYoO4S+YNqupyVXW5zBuIu/pvHuxtq5j5DLHkfxsFxoaBlN1vVKbEN2TQ5wdYLc8++YibhZvJx3VZizgy8rVEYhwDfUKZFxd/Jf8m4gsydtENJ17TZ8lcLbOGrFfJrKmOiDxHPk58GJ8oPqu3UmDOLr2B5/AhYt08K9Z9AMdAsCeQml6BnKdiriC+iP/iKWkdH7gQgSRfQoi4SWoLcMqsRaUcZiX1xu4yrZmpp6p721lavlLYK/PfeIm4djsCE7xZDNqSVocV9evNJCKIjq6TuTbbAlWvQGZfiCwWJqkqqb7pMUwG0IV/QXwdz1ouKjZXOP021EQjqt2i2k00/Tv1Evj8OfRnC1aPeokl2e/LrM/aYUk2Pgc43T6knqzjBCZytqqhpGpK0DXCmrC26d1Qgs3BJzihnqyPwbdWYJMaFyzLnyuW6yMFLrEsH7ftLyZ/LxbX7vRisrwFW7VHJk/a1+4njuL1udx5Rd9nW/A6cdS+dv/FgHPpl9PhorH67l9Ox62/nv8YdPX3dno9/z+G+TGrzjgPKwAAAABJRU5ErkJggg==',
-    widgetCss = '#remotestorage-connect { position:fixed; top:15px; right:15px; height:32px; width:275px; font:normal 16px/100% sans-serif; z-index:99999; background:rgba(0,0,0,.3); padding:5px; border-radius:7px; box-shadow:0 1px rgba(255,255,255,.05), inset 0 1px rgba(0,0,0,.05); transition:width 500ms, background 500ms; }' 
-      +'#remotestorage-connect.remotestorage-connected { width:32px; background:none; box-shadow:none; }' 
-      
+   widgetCss =
+      //make the things as a whole wide by default, or just the cube in 'connected', 'busy' and 'offline' states:
+      '#remotestorage-state { position:fixed; top:15px; right:15px; height:32px; width:275px; font:normal 16px/100% sans-serif; z-index:99999; background:rgba(0,0,0,.3); padding:5px; border-radius:7px; box-shadow:0 1px rgba(255,255,255,.05), inset 0 1px rgba(0,0,0,.05); transition:width 500ms, background 500ms; }' 
+      +'#remotestorage-state.connected, #remotestorage-state.busy, #remotestorage-state.offline { width:32px; background:none; box-shadow:none; }' 
+      //style for both buttons:
       +'.remotestorage-button { margin:0; padding:.3em; font-size:14px; height:26px !important; background:#ddd; color:#333; border:1px solid #ccc; border-radius:3px; box-shadow:0 1px 1px #fff inset; }' 
-      
-      +'#remotestorage-get { position:absolute; left:25px; top:8px; max-height:16px; text-decoration:none; font-weight:normal; }' 
+      //style for the register button:
+      +'#remotestorage-register-button { position:absolute; left:25px; top:8px; max-height:16px; text-decoration:none; font-weight:normal; }' 
+      //style for the connect button:
+      +'#remotestorage-connect-button { position:absolute; right:8px; top:8px; padding:0 0 0 17px; width:90px; cursor:pointer; text-align:left; border-radius:0 3px 3px 0; font-weight:normal; }' 
+      +'#remotestorage-connect-button:hover, #remotestorage-connect-button:focus, .remotestorage-button:hover, .remotestorage-button:focus { background:#eee; color:#000; text-decoration:none; }' 
+      //style for the useraddress text input:
       +'#remotestorage-useraddress { position:absolute; left:25px; top:8px; margin:0; padding:0 17px 0 3px; height:25px; width:142px; background:#eee; color:#333; border:0; border-radius:3px 0 0 3px; box-shadow:0 1px #fff, inset 0 1px #999; font-weight:normal; font-size:14px;}'
       +'#remotestorage-useraddress:hover, #remotestorage-useraddress:focus { background:#fff; color:#000; }' 
-      +'#remotestorage-icon { position:absolute; right:84px; -webkit-transition:right 500ms; -moz-transition:right 500ms; transition:right 500ms; z-index:99997; }' 
-      +'#remotestorage-status { position:absolute; right:8px; top:8px; padding:0 0 0 17px; width:90px; cursor:pointer; text-align:left; border-radius:0 3px 3px 0; font-weight:normal; }' 
-      +'#remotestorage-status:hover, #remotestorage-status:focus, .remotestorage-button:hover, .remotestorage-button:focus { background:#eee; color:#000; text-decoration:none; }' 
-     
-      +'#remotestorage-info { position:absolute; left:0; padding:9px 8px; color:#fff; text-decoration:none; z-index:99999; font-weight:normal; }' 
-      +'#remotestorage-infotext { position:absolute; left:0; top:0; width:255px; height:32px; padding:6px 5px 4px 25px; font-size:10px; background:black; color:white; border-radius:7px; opacity:.85; text-decoration:none; white-space:nowrap; z-index:99998; }' 
-      +'#remotestorage-info:hover { color:#fff; }' 
-      +'#remotestorage-info:hover+#remotestorage-infotext { display:inline; }' 
-      
+      //style for the cube:
+      +'#remotestorage-cube { position:absolute; right:84px; -webkit-transition:right 500ms; -moz-transition:right 500ms; transition:right 500ms; z-index:99997; }' 
+      //style for the questionmark and infotexts:
+      +'#remotestorage-questionmark { position:absolute; left:0; padding:9px 8px; color:#fff; text-decoration:none; z-index:99999; font-weight:normal; }' 
+      +'.infotext { position:absolute; left:0; top:0; width:255px; height:32px; padding:6px 5px 4px 25px; font-size:10px; background:black; color:white; border-radius:7px; opacity:.85; text-decoration:none; white-space:nowrap; z-index:99998; }' 
+      +'#remotestorage-questiomark:hover { color:#fff; }' 
+      +'#remotestorage-questionmark:hover+#remotestorage-infotext { display:inline; }' 
+      //style for loading animation: 
       +'#remotestorage-icon.remotestorage-loading {' 
       +'   -webkit-animation-name:remotestorage-loading; -webkit-animation-duration:2s; -webkit-animation-iteration-count:infinite; -webkit-animation-timing-function:linear;' 
       +'   -moz-animation-name:remotestorage-loading; -moz-animation-duration:2s; -moz-animation-iteration-count:infinite; -moz-animation-timing-function:linear;' 
@@ -34,12 +39,18 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       +'   @-moz-keyframes remotestorage-loading { from{-moz-transform:rotate(0deg)} to{-moz-transform:rotate(360deg)} }' 
       +'   @-o-keyframes remotestorage-loading { from{-o-transform:rotate(0deg)} to{-o-transform:rotate(360deg)} }' 
       +'   @-ms-keyframes remotestorage-loading { from{-ms-transform:rotate(0deg)} to{ -ms-transform:rotate(360deg)} }' 
-      +'#remotestorage-connect.remotestorage-connected #remotestorage-useraddress, #remotestorage-connect.remotestorage-connected #remotestorage-status, #remotestorage-connect.remotestorage-connected #remotestorage-info, #remotestorage-connect.remotestorage-connected #remotestorage-get { display:none !important; }' 
-      +'#remotestorage-connect.remotestorage-connected #remotestorage-icon { right:0; opacity:.5; cursor:pointer; }' 
+      //hide all elements except the cube when in connected state:
+      +'#remotestorage-state.connected #remotestorage-useraddress, #remotestorage-state.connected #remotestorage-connect-button, #remotestorage-state.connected #remotestorage-questionmark, #remotestorage-state.connected #remotestorage-register-button { display:none !important; }' 
+      +'#remotestorage-state.connected #remotestorage-cube { right:0; opacity:.5; cursor:pointer; }' 
+      //hide all elements except the devsonly text when in devsonly state:
+      +'#remotestorage-state.devsonly #remotestorage-useraddress, #remotestorage-state.devsonly #remotestorage-connect-button, #remotestorage-state.devsonly #remotestorage-questionmark, #remotestorage-state.devsonly #remotestorage-register-button, #remotestorage-state.devsonly #remotestorage-cube, #remotestorage-state.devsonly #remotestorage-disconnect, #remotestorage-state.devsonly #remotestorage-infotext { display:none !important; }' 
+      +'#remotestorage-state #remotestorage-devsonly { display: none }'
+      +'#remotestorage-state.devsonly #remotestorage-devsonly { display: block }'
+      //style for disconnect hover:
       +'#remotestorage-disconnect { position:absolute; right:6px; top:9px; padding:5px 28px 2px 6px; height:17px; white-space:nowrap; font-size:10px; background:#000; color:#fff; border-radius:5px; opacity:.5; text-decoration:none; z-index:99996; }' 
       +'#remotestorage-disconnect strong { font-weight:bold; }' 
-      +'#remotestorage-connect.remotestorage-connected #remotestorage-icon:hover { opacity:1; }' 
-      +'#remotestorage-connect.remotestorage-connected #remotestorage-icon:hover+#remotestorage-disconnect { display:inline; }',
+      +'#remotestorage-state.connected #remotestorage-cube:hover { opacity:1; }' 
+      +'#remotestorage-state.connected #remotestorage-cube:hover+#remotestorage-disconnect { display:inline; }',
     locale='en',
     connectElement,
     widgetState;
@@ -81,37 +92,24 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
     widgetState = state;
     displayWidgetState(state);
   }
-  function displayWidgetState(state) {
-    var spin = (state == 'unknown' || state == 'connecting' || state == 'busy'),
-      showHover = (state == 'busyHover' || state == 'offlineHover' || state == 'connectedHover'),
-      showHint = (state == 'anonymousHover'),
-      showRegister = (state == 'anonymous' || state == 'failed' || state == 'interrupted'),
-      showConnect = (state == 'anonymous' || state == 'failed' || state == 'interrupted' || state == 'registering' || state == 'typing'),
-      showInput = (state == 'typing' || state == 'registering'),
-      showDisconnect = false,
-      html;
-    if(localStorage.boldlyGo) {
-      html = 
-        '<style>'+widgetCss+'</style>'
-        +'<input id="remotestorage-useraddress" type="text" placeholder="you@remotestorage" autofocus="" '+(showInput ? '':'style="display: none"')+' >'
-        +(showConnect ? '<input id="remotestorage-status" class="remotestorage-button" type="submit" value="connect">':'')
-        +'<img id="remotestorage-icon" class="'+(spin ? 'spin ' : 'still ')+'" src="'+remoteStorageCube+'">'
-        +(showDisconnect ? '<span id="remotestorage-disconnect">Disconnect <strong></strong></span>':'')
-        +'<a id="remotestorage-info" href="http://unhosted.org/#remotestorage" target="_blank">?</a>'
-        +'<span id="remotestorage-infotext" '+(showHint ? '':'style="display:none"')+'>This app allows you to use your own data storage!<br>Click for more info on the Unhosted movement.</span>'
-        +'<a id="remotestorage-get" class="remotestorage-button" href="http://unhosted.org/en/a/register.html" target="_blank" '+(showRegister ? '':'style="display:none"')+'>get remoteStorage</a>';
-        + '<input type="submit" value="'+translate('Get an account')+'" id="remotestorage-get" '+(showRegister ? '':'style="display:none"')+' >'
-        + '<span id="remotestorage-icon"></span>'
-        + '<span id="remotestorage-hover">'+(showHover ? 'hover ' : '')+'</span>';
-    } else {
-      html = 
-        '<style>'+widgetCss+'</style>'
-        +'<a href="http://unhosted.org" target="_blank" id="remotestorage-infotext">Developer preview only! Find a way to read these instructions, and then run localStorage.setItem("boldlyGo", "engage"); from the console.<br>Click for more info on the Unhosted movement.</a>'
+  function displayWidgetState(state, userAddress) {
+    if(!localStorage.boldlyGo) {
+      state='devsonly';
     }
+    var html = 
+      '<style>'+widgetCss+'</style>'
+      +'<div id="remotestorage-state" class="'+state+'">'
+      +'  <input id="remotestorage-connect-button" class="remotestorage-button" type="submit" value="'+translate('connect')+'">'//connect button
+      +'  <a id="remotestorage-register-button" class="remotestorage-button" href="http://unhosted.org/en/a/register.html" target="_blank">'+translate('get remoteStorage')+'</a>'//register
+      +'  <img id="remotestorage-cube" src="'+remoteStorageCube+'">'//cube
+      +'  <a id="remotestorage-questionmark" href="http://unhosted.org/#remotestorage" target="_blank">?</a>'//question mark
+      +'  <span class="infotext" id="remotestorage-infotext">This app allows you to use your own data storage!<br>Click for more info on the Unhosted movement.</span>'//info text
+      +'  <input id="remotestorage-useraddress" type="text" placeholder="you@remotestorage" autofocus >'//text input
+      +'  <span id="remotestorage-disconnect">Disconnect <strong>'+userAddress+'</strong></span>'//disconnect hover
+      +'  <a class="infotext" href="http://unhosted.org" target="_blank" id="remotestorage-devsonly">Developer preview only! Find a way to read these instructions, and then run localStorage.setItem("boldlyGo", "engage"); from the console.<br>Click for more info on the Unhosted movement.</a>'
+      +'</div>';
     platform.setElementHTML(connectElement, html);
-    platform.eltOn('remotestorage-status', 'click', handleWidgetClickButton);
-    //platform.eltOn('remotestorage-get', 'click', handleWidgetClickGet);
-    //platform.eltOn(connectElement, 'hover', handleWidgetHover);
+    platform.eltOn('remotestorage-connect-button', 'click', handleWidgetClickButton);
     platform.eltOn('remotestorage-useraddress', 'type', handleWidgetTypeUserAddress);
   }
   function handleWidgetClickButton() {

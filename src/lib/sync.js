@@ -16,8 +16,8 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
       localStorage.setItem(prefix+list, JSON.stringify(list));
     }
   }
-  function getStatus(path) {
-    return 'disconnected';
+  function getState(path) {
+    return 'busy';
   }
   function getUserAddress() {
     return null;
@@ -31,7 +31,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
       cb(null, fromCache);
     } else {
       wireClient.get(path, function(err, data) {
-        if(getStatus(path) != 'disconnected') {
+        if(getState(path) != 'disconnected') {
           store.set(path, data);
           addToList('pull', path, getCurrentTimeStamp());
         }
@@ -48,7 +48,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
     addPath : function(path) {
       addToList('pull', path, 0);
     },
-    getStatus : getStatus,
+    getState : getState,
     getUserAddress : getUserAddress,
     get : get,
     on : on
