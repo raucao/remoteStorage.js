@@ -90,18 +90,24 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       html;
     showInput = showConnect = true;
     showHover = showDisconnect = false;
-    html = 
-      '<style>'+widgetCss+'</style>'
-      +'<input id="remotestorage-useraddress" type="text" placeholder="you@remotestorage" autofocus="" '+(showInput ? '':'style="display: none"')+' >'
-      +(showConnect ? '<input id="remotestorage-status" class="remotestorage-button" type="submit" value="connect">':'')
-      +'<img id="remotestorage-icon" class="'+(spin ? 'spin ' : 'still ')+'" src="'+remoteStorageCube+'">'
-      +(showDisconnect ? '<span id="remotestorage-disconnect">Disconnect <strong></strong></span>':'')
-      +'<a id="remotestorage-info" href="http://unhosted.org/#remotestorage" target="_blank">?</a>'
-      //+'<span id="remotestorage-infotext" '+(showRegister ? '':'style="display:none"')+'>This app allows you to use your own data storage!<br>Click for more info on the Unhosted movement.</span>'
-      //+'<a id="remotestorage-get" class="remotestorage-button" href="http://unhosted.org/en/a/register.html" target="_blank" '+(showRegister ? '':'style="display:none"')+'>get remoteStorage</a>';
-      //+ '<input type="submit" value="'+translate('Get an account')+'" id="remotestorage-get" '+(showRegister ? '':'style="display:none"')+' >'
-      + '<span id="remotestorage-icon"></span>'
-      + '<span id="remotestorage-hover">'+(showHover ? 'hover ' : '')+'</span>';
+    if(localStorage.boldlyGo) {
+      html = 
+        '<style>'+widgetCss+'</style>'
+        +'<input id="remotestorage-useraddress" type="text" placeholder="you@remotestorage" autofocus="" '+(showInput ? '':'style="display: none"')+' >'
+        +(showConnect ? '<input id="remotestorage-status" class="remotestorage-button" type="submit" value="connect">':'')
+        +'<img id="remotestorage-icon" class="'+(spin ? 'spin ' : 'still ')+'" src="'+remoteStorageCube+'">'
+        +(showDisconnect ? '<span id="remotestorage-disconnect">Disconnect <strong></strong></span>':'')
+        +'<a id="remotestorage-info" href="http://unhosted.org/#remotestorage" target="_blank">?</a>'
+        //+'<span id="remotestorage-infotext" '+(showRegister ? '':'style="display:none"')+'>This app allows you to use your own data storage!<br>Click for more info on the Unhosted movement.</span>'
+        //+'<a id="remotestorage-get" class="remotestorage-button" href="http://unhosted.org/en/a/register.html" target="_blank" '+(showRegister ? '':'style="display:none"')+'>get remoteStorage</a>';
+        //+ '<input type="submit" value="'+translate('Get an account')+'" id="remotestorage-get" '+(showRegister ? '':'style="display:none"')+' >'
+        + '<span id="remotestorage-icon"></span>'
+        + '<span id="remotestorage-hover">'+(showHover ? 'hover ' : '')+'</span>';
+    } else {
+      html = 
+        '<style>'+widgetCss+'</style>'
+        +'<a href="http://unhosted.org" target="_blank" id="remotestorage-infotext">Developer preview only! Find a way to read these instructions, and then run localStorage.setItem("boldlyGo", "engage"); from the console.<br>Click for more info on the Unhosted movement.</a>'
+    }
     platform.setElementHTML(connectElement, html);
     platform.eltOn('remotestorage-status', 'click', handleWidgetClickButton);
     //platform.eltOn('remotestorage-get', 'click', handleWidgetClickGet);
