@@ -106,3 +106,22 @@ This is version 0.5.6 of the library, and you can use it under AGPL or MIT licen
                                                                                           -> simple
                                                                                           -> couch
                                                                                                      -> platform
+
+
+## widget states, and session and sync states implied by them:
+
+    Widget state        Session state       Sync state
+    anonymous           anonymous           anonymous
+    hint                anonymous           anonymous
+    registering         anonymous           anonymous
+    typing              anonymous           anonymous
+    failed              anonymous           anonymous
+    connecting          connecting          anonymous
+    [off-screen]        authing             anonymous
+    interrupted         authing             anonymous
+    busy                connected           busy
+    busyHover           connected           busy
+    connected           connected           idle
+    connectedHover      connected           idle
+    offline             connected           offline
+    offlineHover        connected           offline

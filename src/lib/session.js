@@ -105,7 +105,19 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
     set('scopes', scopes);
   }
   function getState() {
-    return 'anonymous';
+    if(get('userAddress')) {
+      if(get('storageInfo')) {
+        if(get('token')) {
+          return 'connected';
+        } else {
+          return 'authing';
+        }
+      } else {
+        return 'connecting';
+      }
+    } else {
+      return 'anonymous';
+    }
   }
   function on(eventType, cb) {
     if(eventType == 'state') {
