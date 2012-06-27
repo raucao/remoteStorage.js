@@ -8,12 +8,15 @@
 
     <div id="remotestorage-connect"></div>
 
-#### then in your app's onload function, add a call to put the 'connect your remote storage' UI into that div, load the 'tasks' module,
+#### then in your app's onload function, add a call to put the 'connect your remote storage' UI into that div, 
 
     remoteStorage.displayWidget('remotestorage-connect');
+
+#### load the 'tasks' module,
+
     remoteStorage.loadModule('tasks', '0.1', 'rw');
 
-#### open a private task list:
+#### open a private tasks list called 'todos':
 
     todos = remoteStorage.tasks.getPrivateList('todos');
 
@@ -59,4 +62,4 @@ marks that todo item as completed (you can see we really have a higher-level API
 #### function list.isCompleted(id);
 
 returns true or false. this one is maybe a bit silly, you could also just get the object and read the obj.completed field. or maybe we should make obj.isCompleted(), 
-inline with OO practice.
+inline with OO practice. Anyway, you get the idea. I hope that with this everybody can write apps very easily based on modules like this. For now i only included 'tasks', but once this works it should be easy to make first versions of other modules like 'documents', 'contacts', 'photos', 'stuff', 'music', etcetera. Pull requests welcome! :)
