@@ -84,12 +84,12 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
   function displayWidgetState(state) {
     var spin = (state == 'unknown' || state == 'connecting' || state == 'busy'),
       showHover = (state == 'busyHover' || state == 'offlineHover' || state == 'connectedHover'),
+      showHint = (state == 'anonymousHover'),
       showRegister = (state == 'anonymous' || state == 'failed' || state == 'interrupted'),
       showConnect = (state == 'anonymous' || state == 'failed' || state == 'interrupted' || state == 'registering' || state == 'typing'),
       showInput = (state == 'typing' || state == 'registering'),
+      showDisconnect = false,
       html;
-    showInput = showConnect = true;
-    showHover = showDisconnect = false;
     if(localStorage.boldlyGo) {
       html = 
         '<style>'+widgetCss+'</style>'
@@ -98,9 +98,9 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
         +'<img id="remotestorage-icon" class="'+(spin ? 'spin ' : 'still ')+'" src="'+remoteStorageCube+'">'
         +(showDisconnect ? '<span id="remotestorage-disconnect">Disconnect <strong></strong></span>':'')
         +'<a id="remotestorage-info" href="http://unhosted.org/#remotestorage" target="_blank">?</a>'
-        //+'<span id="remotestorage-infotext" '+(showRegister ? '':'style="display:none"')+'>This app allows you to use your own data storage!<br>Click for more info on the Unhosted movement.</span>'
-        //+'<a id="remotestorage-get" class="remotestorage-button" href="http://unhosted.org/en/a/register.html" target="_blank" '+(showRegister ? '':'style="display:none"')+'>get remoteStorage</a>';
-        //+ '<input type="submit" value="'+translate('Get an account')+'" id="remotestorage-get" '+(showRegister ? '':'style="display:none"')+' >'
+        +'<span id="remotestorage-infotext" '+(showHint ? '':'style="display:none"')+'>This app allows you to use your own data storage!<br>Click for more info on the Unhosted movement.</span>'
+        +'<a id="remotestorage-get" class="remotestorage-button" href="http://unhosted.org/en/a/register.html" target="_blank" '+(showRegister ? '':'style="display:none"')+'>get remoteStorage</a>';
+        + '<input type="submit" value="'+translate('Get an account')+'" id="remotestorage-get" '+(showRegister ? '':'style="display:none"')+' >'
         + '<span id="remotestorage-icon"></span>'
         + '<span id="remotestorage-hover">'+(showHover ? 'hover ' : '')+'</span>';
     } else {
