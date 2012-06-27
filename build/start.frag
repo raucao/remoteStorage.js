@@ -11,14 +11,14 @@
       deps[name].push(dir+relDeps[i]);
     }
   }
-  function loadModule(name) {
+  function _loadModule(name) {
     if(name=='require') {//not including that one, out!
       return function(){};
     }
     var modNames = deps[name];
     var mods={};
     for(var i=0;i<modNames.length;i++) {
-      mods[modNames[i]]=loadModule(modNames[i]);
+      mods[modNames[i]]=_loadModule(modNames[i]);
     }
     var modList=[];
     for(var i=0;i<modNames.length;i++) {

@@ -14,8 +14,8 @@
 //                cache 
 
 define(
-  ['require', './platform', './couch', './dav', './getputdelete'],
-  function (require, platform, couch, dav, getputdelete) {
+  ['./platform', './couch', './dav', './getputdelete'],
+  function (platform, couch, dav, getputdelete) {
     var getDriver = function (type, cb) {
         if(type === 'https://www.w3.org/community/rww/wiki/read-write-web-00#couchdb'
           || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#couchdb') {

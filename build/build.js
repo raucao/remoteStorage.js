@@ -7,11 +7,15 @@ var config = {
   wrap: {
     startFile: 'start.frag',
     endFile:'end.frag'
-  }
+  },
 };
 requirejs.optimize(config);
 var nodeConfig = config;
-nodeConfig.out='latest/remoteStorage-node.js';
-nodeConfig.wrap.endFile='endNode.frag';
+nodeConfig.out = 'latest/remoteStorage-node.js';
+nodeConfig.wrap.endFile = 'endNode.frag';
 
 requirejs.optimize(nodeConfig);
+var debugConfig = config;
+debugConfig.optimize = 'none';
+debugConfig.out = 'latest/remoteStorage-debug.js';
+requirejs.optimize(debugConfig);
