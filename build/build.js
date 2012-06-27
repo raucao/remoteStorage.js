@@ -1,5 +1,7 @@
 var fs=require('fs'),
   requirejs = require('requirejs');
+
+//normal build:
 var config = {
   baseUrl: '../src',
   name: 'remoteStorage',
@@ -10,12 +12,14 @@ var config = {
   },
 };
 requirejs.optimize(config);
-var nodeConfig = config;
-nodeConfig.out = 'latest/remoteStorage-node.js';
-nodeConfig.wrap.endFile = 'endNode.frag';
 
-requirejs.optimize(nodeConfig);
-var debugConfig = config;
-debugConfig.optimize = 'none';
-debugConfig.out = 'latest/remoteStorage-debug.js';
-requirejs.optimize(debugConfig);
+//debug build:
+config.optimize = 'none';
+config.out = 'latest/remoteStorage-debug.js';
+
+//node build:
+requirejs.optimize(config);
+delete config.optimize;
+config.out = 'latest/remoteStorage-node.js';
+config.wrap.endFile = 'endNode.frag';
+requirejs.optimize(config);

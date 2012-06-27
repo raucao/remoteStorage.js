@@ -1746,5 +1746,5 @@ define('remoteStorage',['require', './lib/platform', './lib/couch', './lib/dav',
   };
 });
 
-  module.exports = loadModule('remoteStorage');
+  remoteStorage = _loadModule('remoteStorage');
 })();
