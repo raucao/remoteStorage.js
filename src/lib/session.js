@@ -41,9 +41,38 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
       }
     });
   }
+  function redirectUriToClientId(loc) {
+    //TODO: add some serious unit testing to this function
+    if(loc.substring(0, 'http://'.length) == 'http://') {
+      loc = loc.substring('http://'.length);
+    } else if(loc.substring(0, 'https://'.length) == 'https://') {
+      loc = loc.substring('https://'.length);
+    } else {
+      return loc;//for all other schemes
+    }
+    var hostParts = loc.split('/')[0].split('@');
+    if(hostParts.length > 2) {
+      return loc;//don't know how to simplify URLs with more than 1 @ before the third slash
+    }
+    if(hostParts.length == 2) {
+      hostParts.shift();
+    }
+    return hostParts[0].split(':')[0];
+  }
   function dance() {
-    platform.setLocation(get('storageInfo').properties.authHref
-      +'?scope='+encodeURIComponent(get('scopes')));
+    var endPointParts = get('storageInfo').properties['auth-endpoint'].split('?');
+    var queryParams = [];
+    if(endPointParts.length == 2) {
+      queryParams=endPointParts[1].split('&');
+    } else if(endPointParts.length>2) {
+      errorHandler('more than one questionmark in auth-endpoint - ignoring');
+    }
+    var loc = platform.getLocation();
+    queryParams.push('scope='+encodeURIComponent(get('scopes')));
+    queryParams.push('redirect_uri='+encodeURIComponent(loc));
+    queryParams.push('client_id='+encodeURIComponent(redirectUriToClientId(loc)));
+    
+    platform.setLocation(endPointParts[0]+'?'+queryParams.join('&'));
   }
   function setUserAddress(userAddress) {
     set('userAddress', userAddress);

@@ -174,6 +174,11 @@ define([], function() {
       document.getElementById(eltName).onkeyup = cb;
     }
   }
+  function getLocationBrowser() {
+    return window.location.href;
+  }
+  function getLocationNode() {
+  }
   function setLocationBrowser(location) {
     window.location = location;
   }
@@ -193,6 +198,7 @@ define([], function() {
       setElementHTML: setElementHtmlNode,
       getElementValue: getElementValueNode,
       eltOn: eltOnNode,
+      getLocation: getLocationNode,
       setLocation: setLocationNode,
       alert: alertNode
     }
@@ -205,6 +211,7 @@ define([], function() {
         setElementHTML: setElementHtmlBrowser,
         getElementValue: getElementValueBrowser,
         eltOn: eltOnBrowser,
+        getLocation: getLocationBrowser,
         setLocation: setLocationBrowser,
         alert: alertBrowser
       };
@@ -216,6 +223,7 @@ define([], function() {
         setElementHTML: setElementHtmlBrowser,
         getElementValue: getElementValueBrowser,
         eltOn: eltOnBrowser,
+        getLocation: getLocationBrowser,
         setLocation: setLocationBrowser,
         alert: alertBrowser
       };
