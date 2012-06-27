@@ -1,7 +1,6 @@
 define(['./platform', './webfinger', './hardcoded'], function(platform, webfinger, hardcoded) {
   var prefix = 'remoteStorage_session_',
     memCache = {},
-    scopes = [],
     stateHandler = function(){},
     errorHandler = function(){};
   function set(key, value) {
@@ -68,7 +67,15 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
       errorHandler('more than one questionmark in auth-endpoint - ignoring');
     }
     var loc = platform.getLocation();
-    queryParams.push('scope='+encodeURIComponent(get('scopes')));
+    var scopesObj = get('scopes');
+    if(!scopesObj) {
+      return errorHandler('no modules loaded - cannot connect');
+    }
+    var scopesArr = [];
+    for(var i in scopesObj) {
+      scopesArr.push(i+':'+scopesObj[i]);
+    }
+    queryParams.push('scope='+encodeURIComponent(scopesArr));
     queryParams.push('redirect_uri='+encodeURIComponent(loc));
     queryParams.push('client_id='+encodeURIComponent(redirectUriToClientId(loc)));
     
@@ -92,7 +99,10 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
     }
   }
   function addScope(scope) {
-    scopes.push(scope);
+    var scopes = get('scopes') || {};
+    var scopeParts = scope.split(':');
+    scopes[scopeParts[0]] = scopeParts[1];
+    set('scopes', scopes);
   }
   function getState() {
     return 'anonymous';
