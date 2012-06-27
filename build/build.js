@@ -15,11 +15,13 @@ requirejs.optimize(config);
 
 //debug build:
 config.optimize = 'none';
+config.wrap.startFile = 'startDebug.frag';
 config.out = 'latest/remoteStorage-debug.js';
 
 //node build:
 requirejs.optimize(config);
 delete config.optimize;
 config.out = 'latest/remoteStorage-node.js';
+config.wrap.startFile = 'start.frag';
 config.wrap.endFile = 'endNode.frag';
 requirejs.optimize(config);
