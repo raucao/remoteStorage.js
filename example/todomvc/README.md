@@ -1,40 +1,62 @@
-# Adding the remoteStorage syncer to your app:
-#### add the "syncer/" directory (you can copy it from this repo)
+# Adding remoteStorage.js v0.7 to your app:
+#### add "js/remoteStorage.js" (you can copy it from this repo - make sure to check out branch 'v0.7' and not branch 'master'!)
 #### in index.html, include this script and the stylesheet:
 
-    <script src="syncer/include.js"></script>
-    <link rel="stylesheet" href="syncer/remoteStorage.css">
+    <script src="js/remoteStorage.js"></script>
 
 #### in the place where you want the remoteStorage element to go, add a div:
 
     <div id="remotestorage-connect"></div>
 
-#### then in your app's onload function, add a call to put the syncer UI into that div, and specify your onChange handler:
+#### then in your app's onload function, add a call to put the 'connect your remote storage' UI into that div, load the 'tasks' module,
 
-    syncer.display('remotestorage-connect', ['tasks'], 'syncer/', function(e) {
+    remoteStorage.displayWidget('remotestorage-connect');
+    remoteStorage.loadModule('tasks', '0.1', 'rw');
+
+#### open a private task list:
+
+    todos = remoteStorage.tasks.getPrivateList('todos');
+
+#### and specify your handlers for 'error' and 'change' on the task list:
+
+    todos.on('error', function(err) {
+    });
+    todos.on('change', function(id, obj) {
       refreshData();
     });
 
-#### to see what's going on under the hood, optionally add the bookmarklet for the Inspector Gadget to your page:
+#### note that your change handler will be called with an object that has an 'origin' field, that comes with a value of 'tab', 'device', or 'cloud'
 
-    <div id="inspector-bookmarklet" style="position:absolute; bottom:1em; left:1em;">Drag to bookmark bar: <a  href="javascript:if(typeof(syncer)=='undefined'){alert('Oops! Not supported here. Please point the developer of this app to http://unhosted.org');}else{syncer.inspect();}">Inspector Gadget</a></div>
+Note: maybe 'window' is a better term than 'tab' here, this sort of details is still subject to change in the final v0.7
 
-# using the syncer object:
 
-#### to load the array of task items, call:
+# using the tasks list:
 
-    syncer.getCollection('tasks');
+#### function list.getIds();
 
-#### to get an item by id, you could search for it in the array, or just call:
+returns an array of id's, which you can use to retrieve the actual objects.
 
-    syncer.getItem('tasks', id);
+#### function list.get(id);
 
-#### to add or update an item with a certain id, call:
+returns an object from the list, or undefined if there is no object in the list with that id
 
-    syncer.setItem('tasks', id, object); //so without stringifying
+#### function list.set(id, obj);
 
-#### to remove an item from the collection, call:
+sets the item with that id to that object (might trigger a 'change' event with origin 'tab').
 
-    syncer.removeItem('tasks', id);
+#### function list.add(text);
 
-#### check out [js/todo.js](https://github.com/unhosted/todomvc/blob/master/js/app.js) to see the code of this app.
+creates a new todo item with that text, completed set to false, and a randomly generated id, which is returned by the function.
+
+#### function list.remove(id);
+
+removes that item
+
+#### function list.markAsCompleted(id);
+
+marks that todo item as completed (you can see we really have a higher-level API here that understands that tasks are things that have a boolean 'completed' field)
+
+#### function list.isCompleted(id);
+
+returns true or false. this one is maybe a bit silly, you could also just get the object and read the obj.completed field. or maybe we should make obj.isCompleted(), 
+inline with OO practice.
