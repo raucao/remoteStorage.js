@@ -27,7 +27,12 @@ function $(id){
 }
 
 remoteStorage.loadModule('documents', '0.1', 'rw')
+remoteStorage.displayWidget('rs-widget');
 var notes = remoteStorage.documents.getPrivateList('notes')
+notes.on('change', function(e) {
+  updateList()
+  formatting()
+});
 
 
 function show(id) {
@@ -49,12 +54,12 @@ function create() {
 }
 
 function updateList() {
-    var l = notes.getIds().length + 1
+    var ids = notes.getIds()
     var r = []
-    for (var i=0; i<l; ++i) {
-        var item = notes.getTitle(i)
+    for (var i=0; i<ids.length; i++) {
+        var item = notes.getTitle(ids[i])
         if (item) {
-            r.push('<a id="item_'+ i +'" href="#'+i+'">'+ item.slice(0, 50) +'</a>')
+            r.push('<a id="item_'+ ids[i] +'" href="#'+ids[i]+'">'+ item.slice(0, 50) +'</a>')
         }
     }
 
