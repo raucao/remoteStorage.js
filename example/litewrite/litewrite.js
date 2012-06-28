@@ -49,7 +49,7 @@ function create() {
 }
 
 function updateList() {
-    var l = notes.getId().length + 1
+    var l = notes.getIds().length + 1
     var r = []
     for (var i=0; i<l; ++i) {
         var item = notes.getTitle(i)
