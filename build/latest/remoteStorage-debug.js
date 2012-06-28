@@ -1053,11 +1053,17 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
       }
     });
   }
+  function getUserAddress() {
+    return get('userAddress');
+  }
   function onLoad() {
     var tokenHarvested = platform.harvestToken();
     if(tokenHarvested) {
       set('token', tokenHarvested);
     }
+  }
+  function disconnect() {
+    localStorage.clear();
   }
   function addScope(scope) {
     var scopes = get('scopes') || {};
@@ -1092,6 +1098,8 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
   
   return {
     setUserAddress   : setUserAddress,
+    getUserAddress   : getUserAddress,
+    disconnect       : disconnect,
     addScope : addScope,
     getState : getState,
     on : on
@@ -1427,6 +1435,7 @@ define('lib/widget',['./session', './sync', './platform'], function (session, sy
       +'#remotestorage-disconnect { position:absolute; right:6px; top:9px; padding:5px 28px 2px 6px; height:17px; white-space:nowrap; font-size:10px; background:#000; color:#fff; border-radius:5px; opacity:.5; text-decoration:none; z-index:99996; }\n' 
       +'#remotestorage-disconnect strong { font-weight:bold; }\n' 
       +'#remotestorage-state.connected #remotestorage-cube:hover, #remotestorage-state.busy #remotestorage-cube:hover, #remotestorage-state.offline #remotestorage-cube:hover { opacity:1; }\n' 
+      +'#remotestorage-state.connected #remotestorage-disconnect:hover, #remotestorage-state.busy #remotestorage-disconnect:hover, #remotestorage-state.offline #remotestorage-disconnect:hover { display:inline; }\n' 
       +'#remotestorage-state.connected #remotestorage-cube:hover+#remotestorage-disconnect, #remotestorage-state.busy #remotestorage-cube:hover+#remotestorage-disconnect, #remotestorage-state.offline #remotestorage-cube:hover+#remotestorage-disconnect { display:inline; }\n',
     locale='en',
     connectElement,
@@ -1467,7 +1476,7 @@ define('lib/widget',['./session', './sync', './platform'], function (session, sy
   }
   function setWidgetState(state) {
     widgetState = state;
-    displayWidgetState(state);
+    displayWidgetState(state, session.getUserAddress());
   }
   function displayWidgetState(state, userAddress) {
     if(!localStorage.boldlyGo) {
@@ -1487,6 +1496,7 @@ define('lib/widget',['./session', './sync', './platform'], function (session, sy
       +'</div>';
     platform.setElementHTML(connectElement, html);
     platform.eltOn('remotestorage-connect-button', 'click', handleWidgetClickButton);
+    platform.eltOn('remotestorage-disconnect', 'click', handleDisconnectClickButton);
     platform.eltOn('remotestorage-useraddress', 'type', handleWidgetTypeUserAddress);
   }
   function handleWidgetClickButton() {
@@ -1494,6 +1504,14 @@ define('lib/widget',['./session', './sync', './platform'], function (session, sy
       session.setUserAddress(platform.getElementValue('remotestorage-useraddress'));
     } else {
       setWidgetState('typing');
+    }
+  }
+  function handleDisconnectClickButton() {
+    if(widgetState == 'connected') {
+      session.disconnect();
+      setWidgetState('anonymous');
+    } else {
+      alert('you cannot disconnect now, please wait until the cloud is up to date...');
     }
   }
   function handleWidgetClickGet() {

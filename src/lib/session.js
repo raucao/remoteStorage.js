@@ -92,11 +92,17 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
       }
     });
   }
+  function getUserAddress() {
+    return get('userAddress');
+  }
   function onLoad() {
     var tokenHarvested = platform.harvestToken();
     if(tokenHarvested) {
       set('token', tokenHarvested);
     }
+  }
+  function disconnect() {
+    localStorage.clear();
   }
   function addScope(scope) {
     var scopes = get('scopes') || {};
@@ -131,6 +137,8 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
   
   return {
     setUserAddress   : setUserAddress,
+    getUserAddress   : getUserAddress,
+    disconnect       : disconnect,
     addScope : addScope,
     getState : getState,
     on : on
