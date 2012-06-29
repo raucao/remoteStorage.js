@@ -1,5 +1,5 @@
-define(['../lib/baseClient'], function(baseClient) {
-  var errorHandlers=[], myBaseClient = baseClient.getInstance('tasks');
+remoteStorage.defineModule('tasks', '0.1', function(myBaseClient) {
+  var errorHandlers=[];
   function fire(eventType, eventObj) {
     if(eventType == 'error') {
       for(var i=0; i<errorHandlers.length; i++) {
@@ -22,7 +22,7 @@ define(['../lib/baseClient'], function(baseClient) {
     return uuid;
   }
   function getPrivateList(listName) {
-    myBaseClient.connect(listName);
+    myBaseClient.connect(listName+'/');
     function getIds() {
       var myHashmap= myBaseClient.get(listName+'/'), myArray=[];
       for(var i in myHashmap) {

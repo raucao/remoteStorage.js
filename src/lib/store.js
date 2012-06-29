@@ -1,43 +1,53 @@
 define([], function () {
+//for the syncing, it turns out to be useful to store nodes for items, and store their data separately.
+//we can then also use those nodes to mark where outgoing changes exist.
+//so we would have one store for nodes, one for cache, and one for diffs.
+//windows on the same device should share the diffs with each other, but basically flush their memCache whenever a diff or a cache or a node changes.
+//memCache can be one big hashmap of nodes.
+//actually, cache value and diff can be stored on the node, that makes it all a lot easier
+//when a diff exists, then cache value can be expunged, so really, we only have to mark the node as 'outgoing:' with a timestamp.
+//so in memCache, each node has fields:
+//-lastRemoteRevisionSeen: (integer, not necessarily a timestamp!)
+//-force: true/false/undefined
+//-lastFetched: (timestamp on local clock)
+//-outgoingChange: (timestamp on local clock or undefined)
+//-keep: true/false
+//-access: r/rw/null
+//-children: map of filenames->true; {} for leafs
+//-data: (obj), only for leafs
+//
+//store should expose: setObject, setMedia, removeItem, getData, getStatus, from baseClient (will lead to outgoingChange)
+//also: getNode (from sync), updateNode (from sync), forgetNode (from sync)
+//getNode should return {revision: 0} for a cache miss, but {revision:0, access:null, children:['bar']} for /foo if /foo/bar exists
+//when you setObject or setMedia, parent nodes should be created and/or updated.
+
   var onChange,
-    prefix = 'remote_storage_store:',
-    memCache = {};
+    prefixNodes = 'remote_storage_nodes:';
   window.addEventListener('storage', function(e) {
-    if(e.key.substring(0, prefix.length == prefix)) {
-      e.path = e.key.substring(prefix.length);
-      e.origin='device';
-      if(memCache[path]) {//should use null for negative caching!
-        delete memCache[path];
-      }
-      if(onChange) {
+    if(e.key.substring(0, prefixNodes.length == prefixNodes)) {
+      e.path = e.key.substring(prefixNodes.length);
+      if(onChange && !isDir(e.path)) {
+        e.origin='device';
         onChange(e);
       }
     }
   });
-  function get(path) {
-    var valueStr = memCache[path];
-    if(typeof(valueStr) == 'undefined') {//null is used for negative caching!
-      valueStr = memCache[path] = localStorage.getItem(prefix+path);
-    }
-    if(isDir(path)) {
-      if(valueStr) {
-        var value;
-        try {
-          value = JSON.parse(valueStr);
-        } catch(e) {
-        }
-        if(!value) {
-          value = rebuildNow(path);
-          memCache[path]=JSON.stringify(value);
-          localStorage.setItem(prefix+path, memCache[path]);
-        }
-        return value;
-      } else {
-        return {};
+  function getNode(path) {
+    valueStr = localStorage.getItem(prefixNodes+path);
+    var value;
+    if(valueStr) {
+      try {
+        value = JSON.parse(valueStr);
+      } catch(e) {
       }
-    } else {
-      return valueStr;
     }
+    if(!value) {
+      value = {
+        access: null,
+        children: {}
+      };
+    }
+    return value;
   }
   function isDir(path) {
     return path.substr(-1) == '/';
@@ -70,82 +80,34 @@ define([], function () {
   function getCurrTimestamp() {
     return new Date().getTime();
   }
-  function rebuildNow(path) {
-    var obj = {};
-    for(var i=0; i<localStorage.length; i++) {
-      var key = localStorage.key(i);
-      if(key.length > prefix.length+path.length && key.substr(0, prefix.length+path.length)==prefix+path) {
-        obj[getFileName(key)]=getCurrTimestamp();
-      }
-    }
-    for(var key in memCache) {
-      if(key.length > prefix.length+path.length && key.substr(0, prefix.length+path.length)==prefix+path) {
-        obj[getFileName(key)]=getCurrTimestamp();
-      }
-    }
-    return obj;
-  }
-  function storeSet(path, valueStr) {
-    if(typeof(valueStr) == 'undefined') {
-      return storeRemove(path);
-    }
+  function updateNode(path, node) {
+    localStorage.setItem(prefixNodes+path, JSON.stringify(node));
     var containingDir = getContainingDir(path);
     if(containingDir) {
-      currIndex = get(containingDir);
-      currIndex[getFileName(path)] = getCurrTimestamp();
-      storeSet(containingDir, JSON.stringify(currIndex));
-    }
-    memCache[path] = valueStr;
-    localStorage.setItem(prefix+path, valueStr);
-  }
-  function storeRemove(path) {
-    var containingDir = getContainingDir(path);
-    if(containingDir) {
-      var fileName = getFileName(path);
-      currIndex = get(containingDir);
-      if(currIndex[fileName]) {
-        delete currIndex[fileName];
-        storeSet(containingDir, JSON.stringify(currIndex));
+      parentNode=getNode(containingDir);
+      if(!parentNode.children[getFileName(path)]) {
+        parentNode.children[getFileName(path)] = true;
+        updateNode(containingDir, parentNode);
       }
     }
-    memCache[path] = null;//negative caching
-    localStorage.removeItem(prefix+path);
   }
   function on(eventName, cb) {
     if(eventName=='change') {
       onChange = cb;
     }
   }
-  function set(absPath, valueStr) {
-    var ret = storeSet(absPath, valueStr);
-    onChange({
-      origin: 'tab',
-      path: absPath,
-      oldValue: get(absPath),
-      newValue: valueStr
-    });
-    return ret; 
-  }
-  function remove(absPath) {
-    return set(absPath, undefined);
-  }
   function connect(path, connectVal) {
-    sync.addPath(path, connectVal);
-    sync.work();
+    var node = getNode(path);
+    node.startForcing=(connectVal!=false);
+    updateNode(path, node);
   }
   function getState(path) {
     return 'disconnected';
   }
-  function storeObject(path, type, obj) {
-    set(path, JSON.stringify(obj));
-  }
-  function storeMedia(path, mimeType, data) {
-    set(path, data);
-  }
   return {
     on: on,//error,change(origin=tab,device,cloud)
     
-    get      : get,
-    set      : set
+    getNode      : getNode,
+    updateNode : updateNode
   };
 });

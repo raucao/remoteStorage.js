@@ -1,5 +1,5 @@
-define(['../lib/baseClient'], function(baseClient) {
-  var errorHandlers=[], myBaseClient = baseClient.getInstance('documents');
+remoteStorage.defineModule('documents', '0.1', function(myBaseClient) {
+  var errorHandlers=[];
   function fire(eventType, eventObj) {
     if(eventType == 'error') {
       for(var i=0; i<errorHandlers.length; i++) {

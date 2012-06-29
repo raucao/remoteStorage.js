@@ -17,7 +17,9 @@ define(['./sync', './store'], function (sync, store) {
     }
   });
   function set(absPath, valueStr) {
-    var ret = store.set(absPath, valueStr);
+    var node = store.getNode(absPath);
+    node.data = valueStr;
+    var ret = store.updateNode(absPath, node);
     sync.markOutgoingChange(absPath);
     return ret; 
   }
@@ -30,8 +32,15 @@ define(['./sync', './store'], function (sync, store) {
   function makePath(moduleName, path, public, userAddress) {
     return (userAddress && userAddress != sync.getUserAddress() ?'//'+userAddress:'/')+(public?'public/':'')+moduleName+'/'+path;
   }
+  function claimAccess(path, claim) {
+    var node = store.getNode(path);
+    store.access = claim;
+    store.updateNode(path);
+  }
   return {
-    getInstance : function(moduleName) {
+    getInstance : function(moduleName, version, accessClaim) {
+      claimAccess('/'+moduleName+'/'+version+'/', accessClaim);
+      claimAccess('/public/'+moduleName+'/'+version+'/', accessClaim);
       return {
         on          : function(eventType, cb) {//'error' or 'change'. Change events have a path and origin (tab, device, cloud) field
           if(eventType=='change') {
@@ -42,7 +51,8 @@ define(['./sync', './store'], function (sync, store) {
           if(cb) {
             return sync.get(makePath(moduleName, path, public, userAddress), cb);
           } else {
-            return store.get(makePath(moduleName, path, public, userAddress));
+            var node = store.getNode(makePath(moduleName, path, public, userAddress));
+            return node.data;
           }
         },
         remove      : function(path, public) {

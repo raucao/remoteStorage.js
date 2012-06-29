@@ -29,72 +29,38 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
       return 'anonymous';
     }
   }
-  //as you pull in the new timestamps for a directory, you can always update the local copy, because the values in there are always from the last pull.
-  //additionally, the ones that didn't change, you will not have to check. the ones that are newer than what we have should be added to the 'news' list.
-  //we should start syncing with the least common prefix of all pull paths.
-  //start: synced: '', pulling: '/', dirty: '/a/b', '/a/v/d', '/a/v/e'
-  //pull '/', compare with current. if 'a/' gets updated, we pull /a/:
-  //synced: '/', pulling: 'a/', dirty: '/a/b', '/a/v/d', '/a/v/e'
-  //if 'a/' gets updated,
-  //synced: '/a/', pulling: '/a/b/', dirty: '/a/b', '/a/v/d', '/a/v/e'
-  //if 'b' gets updated,
-  //synced: '/a/b', pulling: '/a/v/', dirty: '/a/v/d', '/a/v/e'
-  //if 'd' gets updated but 'e' doesn't,
-  //synced: ['/a/b', '/a/v/e'], pulling: '/a/v/d', dirty: '/a/v/d'
+  //the sync list is at the same time a list of what should be synced and what we know about that data.
+  //a node should have lastFetched, (null if we have no access), and a hashmap of children -> lastModified.
+  //we should not have a separate syncList and store. just an 'includeChildren' field and an 'explicit' field.
+  //syncNode types: noAccess, miss, explicitRecursive, implicitKeep, implicitLeave
+  //a leaf will not need a lastFetch field, because we always fetch its containingDir anyway. so you should never store items
+  //in directories you can't list!
   //
-  //we have a list of paths that should be kept in sync, mapped to the last time they were synced.
-  //- take all containing dirs of paths in that list, and make sure they are there too.
-  function containingDir(path) {
-    var pathParts = path.split('/');
-    if(path.substr(-1)=='/') {
-      pathParts.pop();
-    }
-    if(pathParts.length) {
-      pathParts.pop();
-      return pathParts.join('/');
-    }
-  }
-  function buildTree(listName) {
-    var list = getList(listName);
-    var changed = false;
-    do {
-      for(var i in nodes) {
-        var containingDir = getContainingDir(i);
-        if(containingDir && !list[containingDir]) {
-          if(!list[containingDir]) {
-            list[containingDir] = {
-              path: containingDir,
-              chidren: []
-            };
-          }
-          list[containingDir].children.push(node);
+  function pullMap(map, force) {
+    for(var path in map) {
+      var node = store.getNode(path);//will return a fake dir with empty children list for item
+      //node.revision = the revision we have, 0 if we have nothing;
+      //node.startForcing = force fetch from here on down
+      //node.stopForcing = maybe fetch, but don't force from here on down
+      //node.keep = we're not recursively syncing this, but we obtained a copy implicitly and want to keep it in sync
+      //node.children = a map of children nodes to their revisions (0 for cache miss)
+      
+      if(node.revision<map[path]) {
+        if(node.startForcing) { force = true; }
+        if(node.stopForcing) { force = false; }
+        if(force || node.keep) {
+          wireClient.get(path, function (err, data) {
+            store.set(path, data);
+            pullMap(store.getNode(path).children, force);//recurse without forcing
+          });
+        } else {
+          store.forget(path);
+          pullMap(node.children, force);
         }
-      }
-    } while(changed);
-    var nodes = [];
-    for(var i in list) {
-      nodes.push(i);
-    }
-    return nodes.sort(function(a, b) {
-      return (a.length - b.length);
-    });
-  }
-  function pull() {
-    var pullTree = buildTree('pull');//list of node objects. each node has a .path and a .children.
-    for(var i=0; i<pullTree.length; i++) {
-      pullNode(list[i]);
+      }// else everything up to date
     }
   }
-  function pullNode(node) {
-    wireClient.get(node.path, function(err, data) {
-      var changedElts = handleIncoming(node.path, data);
-      for(var i in node.children) {//this will launch concurrent requests
-        if(changeElts.indexOf(i)!=-1) {
-          pullNode(children[i]);
-        }
-      }
-    });
-  }
+  //
   function getUserAddress() {
     return null;
   }
@@ -116,7 +82,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
     }
   }
   function syncNow() {
-    alert('syncNow');
+    pullMap({'/': infinity}, false);
   }
   function on(eventType, cb) {
   }
@@ -125,7 +91,9 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
       addToList('push', path, getCurrentTimestamp());
     },
     addPath : function(path) {
-      addToList('pull', path, 0);
+      var node = store.getNode(path);
+      node.startForcing=true;
+      store.updateNode(path, node);
     },
     syncNow: syncNow,
     getState : getState,
