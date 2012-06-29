@@ -36,16 +36,20 @@ define(['./sync', './store'], function (sync, store) {
   }
   function claimAccess(path, claim) {
     var node = store.getNode(path);
-    store.access = claim;
-    store.updateNode(path, node);
+    if((claim != node.access) && (claim == 'rw' || node.access == null)) {
+      node.access = claim;
+      store.updateNode(path, node);
+      for(var i in node.children) {
+        claimAccess(path+i, claim);
+      }
+    }
   }
   function isDir(path) {
     return (path.substr(-1)=='/');
   }
   return {
+    claimAccess: claimAccess,
     getInstance : function(moduleName, version, accessClaim) {
-      claimAccess('/'+moduleName+'/'+version+'/', accessClaim);
-      claimAccess('/public/'+moduleName+'/'+version+'/', accessClaim);
       return {
         on          : function(eventType, cb) {//'error' or 'change'. Change events have a path and origin (tab, device, cloud) field
           if(eventType=='change') {

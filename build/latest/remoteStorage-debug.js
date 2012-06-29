@@ -1608,16 +1608,20 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
   }
   function claimAccess(path, claim) {
     var node = store.getNode(path);
-    store.access = claim;
-    store.updateNode(path, node);
+    if((claim != node.access) && (claim == 'rw' || node.access == null)) {
+      node.access = claim;
+      store.updateNode(path, node);
+      for(var i in node.children) {
+        claimAccess(path+i, claim);
+      }
+    }
   }
   function isDir(path) {
     return (path.substr(-1)=='/');
   }
   return {
+    claimAccess: claimAccess,
     getInstance : function(moduleName, version, accessClaim) {
-      claimAccess('/'+moduleName+'/'+version+'/', accessClaim);
-      claimAccess('/public/'+moduleName+'/'+version+'/', accessClaim);
       return {
         on          : function(eventType, cb) {//'error' or 'change'. Change events have a path and origin (tab, device, cloud) field
           if(eventType=='change') {
@@ -1668,6 +1672,10 @@ define('remoteStorage',['require', './lib/platform', './lib/couch', './lib/dav',
       defineModule = function(moduleName, version, module) {
         modules[moduleName+'-'+version] = module(baseClient.getInstance(moduleName, version));
       },
+      addScope = function(path, mode) {
+        session.addScope(path+':'+mode);
+        baseClient.claimAccess(path, mode);
+      },
       loadModule = function(moduleName, version, mode) {
         if(this[moduleName]) {
           return;
@@ -1677,11 +1685,11 @@ define('remoteStorage',['require', './lib/platform', './lib/couch', './lib/dav',
           mode='rw';
         }
         if(mode == 'rw') {
-          session.addScope('/'+moduleName+'/'+version+'/:'+mode);
-          session.addScope('/public/'+moduleName+'/'+version+'/:'+mode);
+          addScope('/'+moduleName+'/'+version+'/', mode);
+          addScope('/public/'+moduleName+'/'+version+'/', mode);
         }
-        session.addScope('/'+moduleName+'/:r');
-        session.addScope('/public/'+moduleName+'/:r');
+        addScope('/'+moduleName+'/', 'r');
+        addScope('/public/'+moduleName+'/', 'r');
       },
       loadModuleAsync = function(moduleName, version, mode, cb) {
         var moduleXhr = new XMLHttpRequest();

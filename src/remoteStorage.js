@@ -6,6 +6,10 @@ define(
       defineModule = function(moduleName, version, module) {
         modules[moduleName+'-'+version] = module(baseClient.getInstance(moduleName, version));
       },
+      addScope = function(path, mode) {
+        session.addScope(path+':'+mode);
+        baseClient.claimAccess(path, mode);
+      },
       loadModule = function(moduleName, version, mode) {
         if(this[moduleName]) {
           return;
@@ -15,11 +19,11 @@ define(
           mode='rw';
         }
         if(mode == 'rw') {
-          session.addScope('/'+moduleName+'/'+version+'/:'+mode);
-          session.addScope('/public/'+moduleName+'/'+version+'/:'+mode);
+          addScope('/'+moduleName+'/'+version+'/', mode);
+          addScope('/public/'+moduleName+'/'+version+'/', mode);
         }
-        session.addScope('/'+moduleName+'/:r');
-        session.addScope('/public/'+moduleName+'/:r');
+        addScope('/'+moduleName+'/', 'r');
+        addScope('/public/'+moduleName+'/', 'r');
       },
       loadModuleAsync = function(moduleName, version, mode, cb) {
         var moduleXhr = new XMLHttpRequest();
