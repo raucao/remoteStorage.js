@@ -36,9 +36,9 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
   //a leaf will not need a lastFetch field, because we always fetch its containingDir anyway. so you should never store items
   //in directories you can't list!
   //
-  function pullMap(map, force) {
+  function pullMap(basePath, map, force) {
     for(var path in map) {
-      var node = store.getNode(path);//will return a fake dir with empty children list for item
+      var node = store.getNode(basePath+path);//will return a fake dir with empty children list for item
       //node.revision = the revision we have, 0 if we have nothing;
       //node.startForcing = force fetch from here on down
       //node.stopForcing = maybe fetch, but don't force from here on down
@@ -49,12 +49,12 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
         if(node.startForcing) { force = true; }
         if(node.stopForcing) { force = false; }
         if((force || node.keep) && node.access) {
-          wireClient.get(path, function (err, data) {
-            store.set(path, data);
-            pullMap(store.getNode(path).children, force);//recurse without forcing
+          wireClient.get(basePath+path, function (err, data) {
+            store.set(basePath+path, data);
+            pullMap(store.getNode(basePath+path).children, force);//recurse without forcing
           });
         } else {
-          store.forget(path);
+          store.forget(basePath+path);
           pullMap(node.children, force);
         }
       }// else everything up to date
@@ -82,7 +82,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
     }
   }
   function syncNow() {
-    pullMap({'/': Infinity}, false);
+    pullMap('', {'/': Infinity}, false);
   }
   function on(eventType, cb) {
   }

@@ -90,7 +90,7 @@ define([], function () {
       var parentNode=getNode(containingDir);
       var changed = false;
       if(!parentNode.children[getFileName(path)]) {
-        parentNode.children[getFileName(path)] = node.revision;
+        parentNode.children[getFileName(path)] = 999999;//meaning we should fetch this node next time
         changed = true;
       }
       if(parentNode.data[getFileName(path)] && !node.data) {

@@ -1197,7 +1197,7 @@ define('lib/store',[], function () {
       var parentNode=getNode(containingDir);
       var changed = false;
       if(!parentNode.children[getFileName(path)]) {
-        parentNode.children[getFileName(path)] = node.revision;
+        parentNode.children[getFileName(path)] = 999999;//meaning we should fetch this node next time
         changed = true;
       }
       if(parentNode.data[getFileName(path)] && !node.data) {
@@ -1265,10 +1265,10 @@ define('lib/wireClient',['./platform', './couch', './dav', './getputdelete', './
   }
   function resolveKey(storageInfo, basePath, relPath, nodirs) {
     var itemPathParts = ((basePath.length?(basePath + '/'):'') + relPath).split('/');
-    var item = itemPathParts.splice(1).join(nodirs ? '_' : '/');
-    return storageInfo.href + '/' + itemPathParts[0]
+    var item = itemPathParts.splice(2).join(nodirs ? '_' : '/');
+    return storageInfo.href + '/' + itemPathParts[1]
       + (storageInfo.properties.legacySuffix ? storageInfo.properties.legacySuffix : '')
-      + '/' + (item[0] == '_' ? 'u' : '') + item;
+      + '/' + (item[2] == '_' ? 'u' : '') + item;
   }
   return {
     get: function (path, cb) {
@@ -1336,9 +1336,9 @@ define('lib/sync',['./wireClient', './session', './store'], function(wireClient,
   //a leaf will not need a lastFetch field, because we always fetch its containingDir anyway. so you should never store items
   //in directories you can't list!
   //
-  function pullMap(map, force) {
+  function pullMap(basePath, map, force) {
     for(var path in map) {
-      var node = store.getNode(path);//will return a fake dir with empty children list for item
+      var node = store.getNode(basePath+path);//will return a fake dir with empty children list for item
       //node.revision = the revision we have, 0 if we have nothing;
       //node.startForcing = force fetch from here on down
       //node.stopForcing = maybe fetch, but don't force from here on down
@@ -1348,13 +1348,13 @@ define('lib/sync',['./wireClient', './session', './store'], function(wireClient,
       if(node.revision<map[path]) {
         if(node.startForcing) { force = true; }
         if(node.stopForcing) { force = false; }
-        if(force || node.keep) {
-          wireClient.get(path, function (err, data) {
-            store.set(path, data);
-            pullMap(store.getNode(path).children, force);//recurse without forcing
+        if((force || node.keep) && node.access) {
+          wireClient.get(basePath+path, function (err, data) {
+            store.set(basePath+path, data);
+            pullMap(store.getNode(basePath+path).children, force);//recurse without forcing
           });
         } else {
-          store.forget(path);
+          store.forget(basePath+path);
           pullMap(node.children, force);
         }
       }// else everything up to date
@@ -1382,7 +1382,7 @@ define('lib/sync',['./wireClient', './session', './store'], function(wireClient,
     }
   }
   function syncNow() {
-    pullMap({'/': Infinity}, false);
+    pullMap('', {'/': Infinity}, false);
   }
   function on(eventType, cb) {
   }
