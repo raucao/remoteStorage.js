@@ -29,7 +29,7 @@ define(['./sync', './store'], function (sync, store) {
   function claimAccess(path, claim) {
     var node = store.getNode(path);
     store.access = claim;
-    store.updateNode(path);
+    store.updateNode(path, node);
   }
   return {
     getInstance : function(moduleName, version, accessClaim) {
