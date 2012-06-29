@@ -115,6 +115,9 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
       });
     }
   }
+  function syncNow() {
+    alert('syncNow');
+  }
   function on(eventType, cb) {
   }
   return {
@@ -124,6 +127,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
     addPath : function(path) {
       addToList('pull', path, 0);
     },
+    syncNow: syncNow,
     getState : getState,
     getUserAddress : getUserAddress,
     get : get,

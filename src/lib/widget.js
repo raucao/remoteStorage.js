@@ -41,8 +41,9 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       +'   @-ms-keyframes remotestorage-loading { from{-ms-transform:rotate(0deg)} to{ -ms-transform:rotate(360deg)} }\n' 
       //hide all elements by default:
       +'#remotestorage-connect-button, #remotestorage-questionmark, #remotestorage-register-button, #remotestorage-cube, #remotestorage-useraddress, #remotestorage-infotext, #remotestorage-devsonly, #remotestorage-disconnect { display:none }\n' 
-      //in anonymous state, display register-button, connect-button, cube, questionmark:
+      //in anonymous and registering state, display register-button, connect-button, cube, questionmark:
       +'#remotestorage-state.anonymous #remotestorage-cube, #remotestorage-state.anonymous #remotestorage-connect-button, #remotestorage-state.anonymous #remotestorage-register-button, #remotestorage-state.anonymous #remotestorage-questionmark { display: block }\n'
+      +'#remotestorage-state.registering #remotestorage-cube, #remotestorage-state.registering #remotestorage-connect-button, #remotestorage-state.registering #remotestorage-register-button, #remotestorage-state.registering #remotestorage-questionmark { display: block }\n'
       //in typing state, display useraddress, connect-button, cube, questionmark:
       +'#remotestorage-state.typing #remotestorage-cube, #remotestorage-state.typing #remotestorage-connect-button, #remotestorage-state.typing #remotestorage-useraddress, #remotestorage-state.typing #remotestorage-questionmark { display: block }\n'
       //display the cube when in connected, busy or offline state:
@@ -104,7 +105,7 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       '<style>'+widgetCss+'</style>'
       +'<div id="remotestorage-state" class="'+state+'">'
       +'  <input id="remotestorage-connect-button" class="remotestorage-button" type="submit" value="'+translate('connect')+'">'//connect button
-      +'  <a id="remotestorage-register-button" class="remotestorage-button" href="http://unhosted.org/en/a/register.html" target="_blank">'+translate('get remoteStorage')+'</a>'//register
+      +'  <span id="remotestorage-register-button" class="remotestorage-button">'+translate('get remoteStorage')+'</span>'//register
       +'  <img id="remotestorage-cube" src="'+remoteStorageCube+'">'//cube
       +'  <span id="remotestorage-disconnect">Disconnect <strong>'+userAddress+'</strong></span>'//disconnect hover; should be immediately preceded by cube because of https://developer.mozilla.org/en/CSS/Adjacent_sibling_selectors:
       +'  <a id="remotestorage-questionmark" href="http://unhosted.org/#remotestorage" target="_blank">?</a>'//question mark
@@ -113,26 +114,13 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       +'  <a class="infotext" href="http://unhosted.org" target="_blank" id="remotestorage-devsonly">Developer preview only! Find a way to read these instructions, and then run localStorage.setItem("boldlyGo", "engage"); from the console.<br>Click for more info on the Unhosted movement.</a>'
       +'</div>';
     platform.setElementHTML(connectElement, html);
-    platform.eltOn('remotestorage-connect-button', 'click', handleWidgetClickButton);
-    platform.eltOn('remotestorage-disconnect', 'click', handleDisconnectClickButton);
+    platform.eltOn('remotestorage-register-button', 'click', handleRegisterButtonClick);
+    platform.eltOn('remotestorage-connect-button', 'click', handleConnectButtonClick);
+    platform.eltOn('remotestorage-disconnect', 'click', handleDisconnectClick);
+    platform.eltOn('remotestorage-cube', 'click', handleCubeClick);
     platform.eltOn('remotestorage-useraddress', 'type', handleWidgetTypeUserAddress);
   }
-  function handleWidgetClickButton() {
-    if(widgetState == 'typing') {
-      session.setUserAddress(platform.getElementValue('remotestorage-useraddress'));
-    } else {
-      setWidgetState('typing');
-    }
-  }
-  function handleDisconnectClickButton() {
-    if(widgetState == 'connected') {
-      session.disconnect();
-      setWidgetState('anonymous');
-    } else {
-      alert('you cannot disconnect now, please wait until the cloud is up to date...');
-    }
-  }
-  function handleWidgetClickGet() {
+  function handleRegisterButtonClick() {
     setRegistering();
     var win = window.open('http://unhosted.org/en/a/register.html', 'Get your remote storage',
       'resizable,toolbar=yes,location=yes,scrollbars=yes,menubar=yes,'
@@ -144,6 +132,24 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
     //  }
     //}, 250);
     setWidgetState('registering');
+  }
+  function handleConnectButtonClick() {
+    if(widgetState == 'typing') {
+      session.setUserAddress(platform.getElementValue('remotestorage-useraddress'));
+    } else {
+      setWidgetState('typing');
+    }
+  }
+  function handleDisconnectClick() {
+    if(widgetState == 'connected') {
+      session.disconnect();
+      setWidgetState('anonymous');
+    } else {
+      alert('you cannot disconnect now, please wait until the cloud is up to date...');
+    }
+  }
+  function handleCubeClick() {
+    sync.syncNow();
   }
   function handleWidgetTypeUserAddress() {
     setRegistering(false);
