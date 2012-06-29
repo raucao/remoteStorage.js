@@ -1668,11 +1668,25 @@ define('remoteStorage',['require', './lib/platform', './lib/couch', './lib/dav',
         }
         session.addScope('/'+moduleName+'/:r');
         session.addScope('/public/'+moduleName+'/:r');
+      },
+      loadModuleAsync = function(moduleName, version, mode, cb) {
+        var moduleXhr = new XMLHttpRequest();
+        var remoteStorage = this;
+        moduleXhr.open('GET', '../../src/modules/tasks-0.1.js', true);
+        moduleXhr.onreadystatechange = function() {
+          if(moduleXhr.readyState == 4 && moduleXhr.status == 200) {
+            eval(moduleXhr.responseText);//how to do this properly? if you know, please send a pull request! :)      
+            loadModule(moduleName, version, mode);
+            cb();
+          }
+        };
+        moduleXhr.send();
       };
   return {
-    displayWidget : widget.display,
-    defineModule  : defineModule,
-    loadModule    : loadModule
+    displayWidget   : widget.display,
+    defineModule    : defineModule,
+    loadModule      : loadModule,
+    loadModuleAsync : loadModuleAsync
   };
 });
 
