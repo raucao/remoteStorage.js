@@ -48,7 +48,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
       if(node.revision<map[path]) {
         if(node.startForcing) { force = true; }
         if(node.stopForcing) { force = false; }
-        if(force || node.keep) {
+        if((force || node.keep) && node.access) {
           wireClient.get(path, function (err, data) {
             store.set(path, data);
             pullMap(store.getNode(path).children, force);//recurse without forcing
