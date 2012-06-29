@@ -51,11 +51,11 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
         if((force || node.keep) && node.access) {
           wireClient.get(basePath+path, function (err, data) {
             store.set(basePath+path, data);
-            pullMap(store.getNode(basePath+path).children, force);//recurse without forcing
+            pullMap(basePath+path, store.getNode(basePath+path).children, force);//recurse without forcing
           });
         } else {
           store.forget(basePath+path);
-          pullMap(node.children, force);
+          pullMap(basePath+path, node.children, force);
         }
       }// else everything up to date
     }
