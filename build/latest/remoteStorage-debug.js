@@ -1591,6 +1591,9 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
     store.access = claim;
     store.updateNode(path, node);
   }
+  function isDir(path) {
+    return (path.substr(-1)=='/');
+  }
   return {
     getInstance : function(moduleName, version, accessClaim) {
       claimAccess('/'+moduleName+'/'+version+'/', accessClaim);
@@ -1609,7 +1612,11 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
             });
           } else {
             var node = store.getNode(makePath(moduleName, version, path, public, userAddress));
-            return node.data;
+            if(isDir(path)) {
+              return node.children;
+            } else {
+              return node.data;
+            }
           }
         },
         remove      : function(path, public) {
