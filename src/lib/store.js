@@ -44,6 +44,8 @@ define([], function () {
     if(!value) {
       value = {
         access: null,
+        revision: 0,
+        keep: true,
         children: {},
         data: (isDir(path)? {} : undefined)
       };
@@ -88,7 +90,7 @@ define([], function () {
       var parentNode=getNode(containingDir);
       var changed = false;
       if(!parentNode.children[getFileName(path)]) {
-        parentNode.children[getFileName(path)] = true;
+        parentNode.children[getFileName(path)] = node.revision;
         changed = true;
       }
       if(parentNode.data[getFileName(path)] && !node.data) {
@@ -102,6 +104,8 @@ define([], function () {
         updateNode(containingDir, parentNode);
       }
     }
+  }
+  function forget(path) {
   }
   function on(eventName, cb) {
     if(eventName=='change') {
@@ -117,9 +121,10 @@ define([], function () {
     return 'disconnected';
   }
   return {
-    on: on,//error,change(origin=tab,device,cloud)
+    on         : on,//error,change(origin=tab,device,cloud)
     
-    getNode      : getNode,
-    updateNode : updateNode
+    getNode    : getNode,
+    updateNode : updateNode,
+    forget     : forget
   };
 });

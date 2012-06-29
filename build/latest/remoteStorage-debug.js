@@ -1053,13 +1053,10 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
       }
     });
   }
-  function getUserAddress() {
-    return get('userAddress');
-  }
   function onLoad() {
     var tokenHarvested = platform.harvestToken();
     if(tokenHarvested) {
-      set('token', tokenHarvested);
+      set('bearerToken', tokenHarvested);
     }
   }
   function disconnect() {
@@ -1074,7 +1071,7 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
   function getState() {
     if(get('userAddress')) {
       if(get('storageInfo')) {
-        if(get('token')) {
+        if(get('bearerToken')) {
           return 'connected';
         } else {
           return 'authing';
@@ -1098,7 +1095,9 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
   
   return {
     setUserAddress   : setUserAddress,
-    getUserAddress   : getUserAddress,
+    getUserAddress   : function() { return get('userAddress'); },
+    getStorageInfo   : function() { return get('storageInfo'); },
+    getBearerToken   : function() { return get('bearerToken'); },
     disconnect       : disconnect,
     addScope : addScope,
     getState : getState,
@@ -1152,6 +1151,8 @@ define('lib/store',[], function () {
     if(!value) {
       value = {
         access: null,
+        revision: 0,
+        keep: true,
         children: {},
         data: (isDir(path)? {} : undefined)
       };
@@ -1196,7 +1197,7 @@ define('lib/store',[], function () {
       var parentNode=getNode(containingDir);
       var changed = false;
       if(!parentNode.children[getFileName(path)]) {
-        parentNode.children[getFileName(path)] = true;
+        parentNode.children[getFileName(path)] = node.revision;
         changed = true;
       }
       if(parentNode.data[getFileName(path)] && !node.data) {
@@ -1210,6 +1211,8 @@ define('lib/store',[], function () {
         updateNode(containingDir, parentNode);
       }
     }
+  }
+  function forget(path) {
   }
   function on(eventName, cb) {
     if(eventName=='change') {
@@ -1225,10 +1228,11 @@ define('lib/store',[], function () {
     return 'disconnected';
   }
   return {
-    on: on,//error,change(origin=tab,device,cloud)
+    on         : on,//error,change(origin=tab,device,cloud)
     
-    getNode      : getNode,
-    updateNode : updateNode
+    getNode    : getNode,
+    updateNode : updateNode,
+    forget     : forget
   };
 });
 
@@ -1247,53 +1251,50 @@ define('lib/store',[], function () {
 //        baseClient  baseClient
 //                cache 
 
-define('lib/wireClient',['./platform', './couch', './dav', './getputdelete'],
-  function (platform, couch, dav, getputdelete) {
-    var getDriver = function (type, cb) {
-        if(type === 'https://www.w3.org/community/rww/wiki/read-write-web-00#couchdb'
-          || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#couchdb') {
-          cb(couch);
-        } else if(type === 'https://www.w3.org/community/rww/wiki/read-write-web-00#webdav'
-          || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#webdav') {
-          cb(dav);
-        } else {
-          cb(getputdelete);
-        }
-      },
-      resolveKey = function(storageInfo, basePath, relPath, nodirs) {
-        var itemPathParts = ((basePath.length?(basePath + '/'):'') + relPath).split('/');
-        var item = itemPathParts.splice(1).join(nodirs ? '_' : '/');
-        return storageInfo.href + '/' + itemPathParts[0]
-          + (storageInfo.properties.legacySuffix ? storageInfo.properties.legacySuffix : '')
-          + '/' + (item[0] == '_' ? 'u' : '') + item;
-      },
-      create = function (storageInfo, token) {
-        return {
-          get: function (path, cb) {
-            if(typeof(path) != 'string') {
-              cb('argument "path" should be a string');
-            } else {
-              getDriver(storageInfo.type, function (d) {
-                d.get(resolveKey(storageInfo, '', path, storageInfo.nodirs), token, cb);
-              });
-            }
-          },
-          set: function (path, valueStr, cb) {
-            if(typeof(path) != 'string') {
-              cb('argument "path" should be a string');
-            } else if(typeof(valueStr) != 'string') {
-              cb('argument "valueStr" should be a string');
-            } else {
-              getDriver(storageInfo.type, function (d) {
-                d.set(resolveKey(storageInfo, '', path, storageInfo.nodirs), value, token, cb);
-              });
-            }
-          },
-        };
-      };
-
+define('lib/wireClient',['./platform', './couch', './dav', './getputdelete', './session'], function (platform, couch, dav, getputdelete, session) {
+  function getDriver(type, cb) {
+    if(type === 'https://www.w3.org/community/rww/wiki/read-write-web-00#couchdb'
+      || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#couchdb') {
+      cb(couch);
+    } else if(type === 'https://www.w3.org/community/rww/wiki/read-write-web-00#webdav'
+      || type === 'https://www.w3.org/community/unhosted/wiki/remotestorage-2011.10#webdav') {
+      cb(dav);
+    } else {
+      cb(getputdelete);
+    }
+  }
+  function resolveKey(storageInfo, basePath, relPath, nodirs) {
+    var itemPathParts = ((basePath.length?(basePath + '/'):'') + relPath).split('/');
+    var item = itemPathParts.splice(1).join(nodirs ? '_' : '/');
+    return storageInfo.href + '/' + itemPathParts[0]
+      + (storageInfo.properties.legacySuffix ? storageInfo.properties.legacySuffix : '')
+      + '/' + (item[0] == '_' ? 'u' : '') + item;
+  }
   return {
-    create : create
+    get: function (path, cb) {
+      var storageInfo = session.getStorageInfo(),
+        token = session.getBearerToken();
+      if(typeof(path) != 'string') {
+        cb('argument "path" should be a string');
+      } else {
+        getDriver(storageInfo.type, function (d) {
+          d.get(resolveKey(storageInfo, '', path, storageInfo.nodirs), token, cb);
+        });
+      }
+    },
+    set: function (path, valueStr, cb) {
+      var storageInfo = session.getStorageInfo(),
+        token = session.getBearerToken();
+      if(typeof(path) != 'string') {
+        cb('argument "path" should be a string');
+      } else if(typeof(valueStr) != 'string') {
+        cb('argument "valueStr" should be a string');
+      } else {
+        getDriver(storageInfo.type, function (d) {
+          d.set(resolveKey(storageInfo, '', path, storageInfo.nodirs), value, token, cb);
+        });
+      }
+    }
   };
 });
 
@@ -1381,7 +1382,7 @@ define('lib/sync',['./wireClient', './session', './store'], function(wireClient,
     }
   }
   function syncNow() {
-    pullMap({'/': infinity}, false);
+    pullMap({'/': Infinity}, false);
   }
   function on(eventType, cb) {
   }

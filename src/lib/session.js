@@ -92,13 +92,10 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
       }
     });
   }
-  function getUserAddress() {
-    return get('userAddress');
-  }
   function onLoad() {
     var tokenHarvested = platform.harvestToken();
     if(tokenHarvested) {
-      set('token', tokenHarvested);
+      set('bearerToken', tokenHarvested);
     }
   }
   function disconnect() {
@@ -113,7 +110,7 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
   function getState() {
     if(get('userAddress')) {
       if(get('storageInfo')) {
-        if(get('token')) {
+        if(get('bearerToken')) {
           return 'connected';
         } else {
           return 'authing';
@@ -137,7 +134,9 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
   
   return {
     setUserAddress   : setUserAddress,
-    getUserAddress   : getUserAddress,
+    getUserAddress   : function() { return get('userAddress'); },
+    getStorageInfo   : function() { return get('storageInfo'); },
+    getBearerToken   : function() { return get('bearerToken'); },
     disconnect       : disconnect,
     addScope : addScope,
     getState : getState,

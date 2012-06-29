@@ -82,7 +82,7 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
     }
   }
   function syncNow() {
-    pullMap({'/': infinity}, false);
+    pullMap({'/': Infinity}, false);
   }
   function on(eventType, cb) {
   }
