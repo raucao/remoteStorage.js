@@ -1152,7 +1152,8 @@ define('lib/store',[], function () {
     if(!value) {
       value = {
         access: null,
-        children: {}
+        children: {},
+        data: (isDir(path)? {} : undefined)
       };
     }
     return value;
@@ -1192,9 +1193,20 @@ define('lib/store',[], function () {
     localStorage.setItem(prefixNodes+path, JSON.stringify(node));
     var containingDir = getContainingDir(path);
     if(containingDir) {
-      parentNode=getNode(containingDir);
+      var parentNode=getNode(containingDir);
+      var changed = false;
       if(!parentNode.children[getFileName(path)]) {
         parentNode.children[getFileName(path)] = true;
+        changed = true;
+      }
+      if(parentNode.data[getFileName(path)] && !node.data) {
+        delete parentNode.data[getFileName(path)];
+        changed = true;
+      } else if(!parentNode.data[getFileName(path)] && node.data) {
+        parentNode.data[getFileName(path)] = true;
+        changed = true;
+      }
+      if(changed) {
         updateNode(containingDir, parentNode);
       }
     }
@@ -1576,11 +1588,19 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
       moduleChangeHandlers[moduleName](eventObj);
     }
   });
-  function set(absPath, valueStr) {
-    var node = store.getNode(absPath);
-    node.data = valueStr;
+  function set(moduleName, version, path, public, userAddress, valueStr) {
+    var absPath = makePath(moduleName, version, path, public, userAddress),
+      node = store.getNode(absPath);
     node.outgoingChange = true;
+    var changeEvent = {
+      origin: 'window',
+      oldValue: node.data,
+      newValue: valueStr,
+      path: path
+    };
+    node.data = valueStr;
     var ret = store.updateNode(absPath, node);
+    moduleChangeHandlers[moduleName](changeEvent);
     return ret; 
   }
   function makePath(moduleName, version, path, public, userAddress) {
@@ -1612,24 +1632,20 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
             });
           } else {
             var node = store.getNode(makePath(moduleName, version, path, public, userAddress));
-            if(isDir(path)) {
-              return node.children;
-            } else {
-              return node.data;
-            }
+            return node.data;
           }
         },
         remove      : function(path, public) {
-          return set(makePath(moduleName, version, path, public), undefined);
+          return set(moduleName, version, path, public);
         },
         
         storeObject : function(path, public, type, obj) {
           obj['@type'] = 'https://remotestoragejs.com/spec/modules/'+type;
           //checkFields(obj);
-          return set(makePath(moduleName, version, path, public), JSON.stringify(obj));
+          return set(moduleName, version, path, public, undefined, JSON.stringify(obj));
         },
         storeMedia  : function(path, mimeType, data) {
-          return set(makePath(moduleName, version, path, public), data);
+          return set(moduleName, version, path, public, undefined, data);
         },
         
         connect     : function(path, public, userAddress, switchVal) {

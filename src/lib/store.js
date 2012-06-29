@@ -44,7 +44,8 @@ define([], function () {
     if(!value) {
       value = {
         access: null,
-        children: {}
+        children: {},
+        data: (isDir(path)? {} : undefined)
       };
     }
     return value;
@@ -84,9 +85,20 @@ define([], function () {
     localStorage.setItem(prefixNodes+path, JSON.stringify(node));
     var containingDir = getContainingDir(path);
     if(containingDir) {
-      parentNode=getNode(containingDir);
+      var parentNode=getNode(containingDir);
+      var changed = false;
       if(!parentNode.children[getFileName(path)]) {
         parentNode.children[getFileName(path)] = true;
+        changed = true;
+      }
+      if(parentNode.data[getFileName(path)] && !node.data) {
+        delete parentNode.data[getFileName(path)];
+        changed = true;
+      } else if(!parentNode.data[getFileName(path)] && node.data) {
+        parentNode.data[getFileName(path)] = true;
+        changed = true;
+      }
+      if(changed) {
         updateNode(containingDir, parentNode);
       }
     }
