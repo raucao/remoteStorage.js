@@ -1350,7 +1350,9 @@ define('lib/sync',['./wireClient', './session', './store'], function(wireClient,
         if(node.stopForcing) { force = false; }
         if((force || node.keep) && node.access) {
           wireClient.get(basePath+path, function (err, data) {
-            store.set(basePath+path, data);
+            var node = store.getNode(basePath+path);
+            node.data = data;
+            store.updateNode(basePath+path, node);
             pullMap(basePath+path, store.getNode(basePath+path).children, force);//recurse without forcing
           });
         } else {
