@@ -1374,14 +1374,6 @@ define('lib/sync',['./wireClient', './session', './store'], function(wireClient,
   function on(eventType, cb) {
   }
   return {
-    markOutgoingChange : function(path) {
-      addToList('push', path, getCurrentTimestamp());
-    },
-    addPath : function(path) {
-      var node = store.getNode(path);
-      node.startForcing=true;
-      store.updateNode(path, node);
-    },
     syncNow: syncNow,
     getState : getState,
     getUserAddress : getUserAddress,
@@ -1587,18 +1579,12 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
   function set(absPath, valueStr) {
     var node = store.getNode(absPath);
     node.data = valueStr;
+    node.outgoingChange = true;
     var ret = store.updateNode(absPath, node);
-    sync.markOutgoingChange(absPath);
     return ret; 
   }
-  function connect(path, connectVal) {
-    sync.addPath(path, connectVal);
-  }
-  function getState(path) {
-    return sync.getState(path);
-  }
-  function makePath(moduleName, path, public, userAddress) {
-    return (userAddress && userAddress != sync.getUserAddress() ?'//'+userAddress:'/')+(public?'public/':'')+moduleName+'/'+path;
+  function makePath(moduleName, version, path, public, userAddress) {
+    return (userAddress ?'//'+userAddress:'/')+(public?'public/':'')+moduleName+'/'+version+'/'+path;
   }
   function claimAccess(path, claim) {
     var node = store.getNode(path);
@@ -1617,30 +1603,35 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
         },
         get         : function(path, public, userAddress, cb) {
           if(cb) {
-            return sync.get(makePath(moduleName, path, public, userAddress), cb);
+            sync.fetchNow(makePath(moduleName, version, path, public, userAddress), function(err) {
+              var node = store.getNode(makePath(moduleName, version, path, public, userAddress));
+              cb(node.data);
+            });
           } else {
-            var node = store.getNode(makePath(moduleName, path, public, userAddress));
+            var node = store.getNode(makePath(moduleName, version, path, public, userAddress));
             return node.data;
           }
         },
         remove      : function(path, public) {
-          return set(makePath(moduleName, path, public), undefined);
+          return set(makePath(moduleName, version, path, public), undefined);
         },
         
         storeObject : function(path, public, type, obj) {
           obj['@type'] = 'https://remotestoragejs.com/spec/modules/'+type;
           //checkFields(obj);
-          return set(makePath(moduleName, path, public), JSON.stringify(obj));
+          return set(makePath(moduleName, version, path, public), JSON.stringify(obj));
         },
         storeMedia  : function(path, mimeType, data) {
-          return set(makePath(moduleName, path, public), data);
+          return set(makePath(moduleName, version, path, public), data);
         },
         
         connect     : function(path, public, userAddress, switchVal) {
-          return sync.addPath(makePath(moduleName, path, public, userAddress), switchVal);
+          var absPath = makePath(moduleName, version, path, public, userAddress);
+          var node = store.getNode(absPath);
+          node.startForcing = (switchVal != false);
+          store.updateNode(absPath, node);
         },
         getState    : function(path, public, userAddress, switchVal) {
-          return sync.getState(makePath(moduleName, path, public, userAddress), switchVal);
         }
       };
     }

@@ -87,14 +87,6 @@ define(['./wireClient', './session', './store'], function(wireClient, session, s
   function on(eventType, cb) {
   }
   return {
-    markOutgoingChange : function(path) {
-      addToList('push', path, getCurrentTimestamp());
-    },
-    addPath : function(path) {
-      var node = store.getNode(path);
-      node.startForcing=true;
-      store.updateNode(path, node);
-    },
     syncNow: syncNow,
     getState : getState,
     getUserAddress : getUserAddress,
