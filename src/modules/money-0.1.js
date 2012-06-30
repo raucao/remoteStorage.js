@@ -38,7 +38,15 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     }
   }
   return {
-    display: display,
-    displayBalances: displayBalances
+    name: 'money',
+    dataVersion: '0.1',
+    dataHints: {
+      "module": "Peer-to-peer bookkeeping based on IOUs (writing down who owes who how much)"
+    },
+    codeVersion: '0.1.0',
+    exports: {
+      display: display,
+      displayBalances: displayBalances
+    }
   };
 });
