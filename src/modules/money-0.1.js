@@ -45,19 +45,6 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
   //addIOU( tag,      thing, amount, currency,owee,ower) {
     addIOU(date, 'transfer', amount, currency, to, from);
   }
-  function display(name, items, owee, ower) {
-    var sum=0;
-    for(var thing in items) {
-      console.log(' >>> '+thing+': '+itoa(items[thing])+' EUR');
-      if(owee && ower) {
-        addIOU(name, thing, items[thing], 'EUR', owee, ower);
-      }
-      sum += items[thing];
-    }
-    sum = roundOff(sum);
-    console.log(name+': '+itoa(sum)+' EUR');
-    return sum;
-  }
   function getBalance(personName, currency) {
     var peers = myBaseClient.get('IOUs/'+personName+'/', true),
       balance = 0;
@@ -73,19 +60,15 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     }
     return balance;
   }
-  function displayBalances() {
+  function getBalances2() {
     var peers = myBaseClient.get('IOUs/', true);
+    var balances = {};
     for(var i in peers) {
       var peerName = i.substring(0, i.length-1);
-      console.log(peerName+': '+itoa(roundOff(getBalance(peerName, 'EUR')))+' EUR');
+      balances[peerName] = itoa(roundOff(getBalance(peerName, 'EUR')))+' EUR';
     }
+    return balances;
   }
-  //function remoteStorage.money.setDebt(from, to, date, amount) {
-  //}
-  //function processList(account, person, cb){}
-  //function addDeclaration(text, amount, peer){}
-  //function addSpend(text, amount, purpose){}
-  //function addTransfer(text, amount, otherAccount){}
   function getBalances(date, currency) {
     var balances={};
     var peers=myBaseClient.get(date+'/0/');
@@ -110,10 +93,8 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     exports: {
       reportTransfer: reportTransfer,
       addDeclaration: addDeclaration,
-      display: display,
-      displayBalances: displayBalances,
-      //setDebt: setDebt,
       getBalances: getBalances,
+      getBalances2: getBalances2,
       setBalance: setBalance
     }
   };
