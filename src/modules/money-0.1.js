@@ -13,17 +13,6 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     return uuid;
   }
   
-  function roundOff(amount) {
-    return Math.floor(100*amount+0.5)/100;
-  }
-  function itoa(i) {
-    var wholes = Math.floor(i);
-    var cents = (i - Math.floor(i))*100;
-    var dimes = Math.floor(cents/10);
-    cents = Math.floor(cents - 10*dimes+0.5);
-    //console.log(i+' -> '+wholes+'.'+dimes+cents);
-    return ''+wholes+'.'+dimes+cents;
-  }
   function addIOU(tag, thing, amount, currency, owee, ower) {
     var uuid = genUuid();
     myBaseClient.storeObject('IOUs/'+ower+'/'+owee+'/'+currency+'/'+uuid, true, 'IOU', {
@@ -60,12 +49,12 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     }
     return balance;
   }
-  function getBalances2() {
+  function getBalances2(currency) {
     var peers = myBaseClient.get('IOUs/', true);
     var balances = {};
     for(var i in peers) {
       var peerName = i.substring(0, i.length-1);
-      balances[peerName] = itoa(roundOff(getBalance(peerName, 'EUR')))+' EUR';
+      balances[peerName] = getBalance(peerName, currency);
     }
     return balances;
   }

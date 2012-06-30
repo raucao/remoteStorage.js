@@ -259,9 +259,20 @@
   //transfer('unhosted-project', 'unhosted-reserved', '2012/09/09', 3000, 'EUR');
   
   console.log('************************');
-  var balances = remoteStorage.money.getBalances2()
+  function itoa(i) {
+    var wholes = Math.floor(i);
+    var cents = (i - Math.floor(i))*100;
+    var dimes = Math.floor(cents/10);
+    cents = Math.floor(cents - 10*dimes+0.5);
+    //console.log(i+' -> '+wholes+'.'+dimes+cents);
+    return ''+wholes+'.'+dimes+cents;
+  }
+  function roundOff(amount) {
+    return Math.floor(100*amount+0.5)/100;
+  }
+  var balances = remoteStorage.money.getBalances2('EUR');
   for(var i in balances) {
-   console.log(i+': '+balances[i]);
+   console.log(i+': '+itoa(roundOff(balances[i]))+' EUR');
   };
   function declaration(person, date, comment, euros) {
     remoteStorage.money.addDeclaration(person, 'unhosted-project', comment, date, euros, 'EUR');
