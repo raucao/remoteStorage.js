@@ -91,7 +91,7 @@
     'reject.js                                            (13 eur, will be paid through berliner bank)': 13,
     'jsconfeu-fun                                         (20 eur, will be paid through berliner bank)': 20
   });
-  bulkDeclaration('michiel', '2011/09/9', '2011/09/09', {
+  bulkDeclaration('michiel', '2011/09/09', {
     'notary                  Seeger&Seeger          31.75         (apr)': 31.75,
     'e.V. registry                                  53.00         (4 jul)': 53,
     'setup fee               paypal                  1.50         (29 apr)': 1.5,
@@ -180,7 +180,7 @@
     '13/06/2012 rackspace':  31.63,
     '14/06/2012 received from surfnet': -526.08,
     '29/06/2012 zekur health insurance': 73.50,
-    'living expenses 9 May - 9 July': 2000,
+    'living expenses 9 May - 9 July': 2000//,
     //'predicted payment nlnet start of July': -5000+2667.24, 
     //'predicted payment Michiel -> Hugo start of July': 556
   });
@@ -254,10 +254,10 @@
   declaration('hugo', '2012/05/31', 'internship May', 500);
   declaration('hugo', '2012/05/04', 'co-up basic + 3 days', 20+3*12);
   declaration('martin', '2012/05/04', 'co-up basic', 20);
-  transfer('unhosted-project', 'unhosted-reserved', '2012/09/09', 3000, 'EUR');
+  //transfer('unhosted-project', 'unhosted-reserved', '2012/09/09', 3000, 'EUR');
   remoteStorage.money.displayBalances();
   function declaration(person, date, comment, euros) {
-    remoteStorage.money.addDeclaration(person, 'unhosted-project', date, euros, 'EUR', comment);
+    remoteStorage.money.addDeclaration(person, 'unhosted-project', comment, date, euros, 'EUR');
   }
   function bulkDeclaration(person, date, items) {
     for(var i in items) {

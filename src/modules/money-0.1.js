@@ -38,9 +38,11 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     });
   }
   function addDeclaration(owee, ower, comment, date, amount, currency) {
+  //addIOU( tag,   thing, amount, currency, owee, ower) {
     addIOU(date, comment, amount, currency, owee, ower);
   }
   function reportTransfer(from, to, date, amount, currency) {
+  //addIOU( tag,      thing, amount, currency,owee,ower) {
     addIOU(date, 'transfer', amount, currency, to, from);
   }
   function display(name, items, owee, ower) {
@@ -64,6 +66,7 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
       var thisPeerIOUs = myBaseClient.get('IOUs/'+personName+'/'+i+currency+'/', true);
       for(var j in thisPeerIOUs) {
         var thisIOU = JSON.parse(myBaseClient.get('IOUs/'+personName+'/'+i+currency+'/'+j, true));
+        console.log(personName+'-'+i+':'+j+' '+typeof(thisPeerBalance));
         thisPeerBalance += thisIOU.amount;
       }
       balance += thisPeerBalance;
