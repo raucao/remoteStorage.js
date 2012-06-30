@@ -28,7 +28,9 @@ define(['./sync', './store'], function (sync, store) {
     };
     node.data = valueStr;
     var ret = store.updateNode(absPath, node);
-    moduleChangeHandlers[moduleName](changeEvent);
+    if(moduleName && moduleChangeHandlers[moduleName]) {
+      moduleChangeHandlers[moduleName](changeEvent);
+    }
     return ret; 
   }
   function makePath(moduleName, version, path, public, userAddress) {
@@ -53,7 +55,9 @@ define(['./sync', './store'], function (sync, store) {
       return {
         on          : function(eventType, cb) {//'error' or 'change'. Change events have a path and origin (tab, device, cloud) field
           if(eventType=='change') {
-            moduleChangeHandlers[moduleName] = cb;
+            if(moduleName && moduleChangeHandlers[moduleName]) {
+              moduleChangeHandlers[moduleName] = cb;
+            }
           }
         },
         get         : function(path, public, userAddress, cb) {
