@@ -66,7 +66,7 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
       var thisPeerIOUs = myBaseClient.get('IOUs/'+personName+'/'+i+currency+'/', true);
       for(var j in thisPeerIOUs) {
         var thisIOU = JSON.parse(myBaseClient.get('IOUs/'+personName+'/'+i+currency+'/'+j, true));
-        console.log(personName+'-'+i+':'+j+' '+typeof(thisPeerBalance));
+        //console.log(personName+'-'+i+':'+j+' '+typeof(thisPeerBalance));
         thisPeerBalance += thisIOU.amount;
       }
       balance += thisPeerBalance;
