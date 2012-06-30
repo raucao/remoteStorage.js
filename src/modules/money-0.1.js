@@ -71,6 +71,26 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
       console.log(peerName+': '+itoa(roundOff(getBalance(peerName, 'EUR')))+' EUR');
     }
   }
+  //function remoteStorage.money.setDebt(from, to, date, amount) {
+  //}
+  //function processList(account, person, cb){}
+  //function addDeclaration(text, amount, peer){}
+  //function addSpend(text, amount, purpose){}
+  //function addTransfer(text, amount, otherAccount){}
+  function getBalances(date, currency) {
+    var balances={};
+    var peers=myBaseClient.get(date+'/0/');
+    for(var i in peers) {
+      var peerName = i.substring(0, i.length-1);
+      balances[peerName]=JSON.parse(myBaseClient.get(date+'/0/'+i+'balance'))[currency];
+    }
+    return balances;
+  }
+  function setBalance(date, peer, amount, currency) {
+    var obj={};
+    obj[currency]=amount;
+    myBaseClient.storeObject(date+'/0/'+peer+'/balance', false, 'balance', obj);
+  }
   return {
     name: 'money',
     dataVersion: '0.1',
@@ -80,7 +100,10 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     codeVersion: '0.1.0',
     exports: {
       display: display,
-      displayBalances: displayBalances
+      displayBalances: displayBalances,
+      //setDebt: setDebt,
+      getBalances: getBalances,
+      setBalance: setBalance
     }
   };
 });
