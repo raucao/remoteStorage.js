@@ -1,5 +1,5 @@
 # Adding remoteStorage.js v0.7 to your app:
-#### add "js/remoteStorage.js" (you can copy it from this repo - make sure to check out branch 'v0.7' and not branch 'master'!)
+#### add "remoteStorage.js" (you can copy it from this repo - make sure to check out branch 'v0.7' and not branch 'master'!)
 #### in index.html, include this script and any modules you plan to load:
 
     <script src="remoteStorage.js"></script>
