@@ -37,6 +37,12 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
       amount: amount
     });
   }
+  function addDeclaration(owee, ower, comment, date, amount, currency) {
+    addIOU(date, comment, amount, currency, owee, ower);
+  }
+  function reportTransfer(from, to, date, amount, currency) {
+    addIOU(date, 'transfer', amount, currency, to, from);
+  }
   function display(name, items, owee, ower) {
     var sum=0;
     for(var thing in items) {
@@ -99,6 +105,8 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     },
     codeVersion: '0.1.0',
     exports: {
+      reportTransfer: reportTransfer,
+      addDeclaration: addDeclaration,
       display: display,
       displayBalances: displayBalances,
       //setDebt: setDebt,
