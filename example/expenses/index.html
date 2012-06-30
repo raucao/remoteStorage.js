@@ -13,19 +13,19 @@
     'Received from Crisp for workshop':                                -540.00,
     'donations accepted in cash by Michiel':                             -40.00
   }, 'michiel', 'unhosted-project');
-  var resMich = display('reserved for Michiel', {
+  var resMich = remoteStorage.money.display('reserved for Michiel', {
     'reserved for Krankenkasse Michiel, 1 Mar 2011 - 8 Sep 2011':       937.00
   }, 'unhosted-reserved', 'unhosted-project');
-  var flJavi = display('freelancer\'s invoice Javier', {
+  var flJavi = remoteStorage.money.display('freelancer\'s invoice Javier', {
     'office desk Javier      co-up, april, 12-day flex':                  95.00,
     'full-time work allowance Javier, 15 Mar 2011 - 31 May 2011':       2500.00,
     'reserved for Krankenkasse Javier, 15 Mar 2011 - 31 May 2011':      375.00,
     'Donation by Javier':                                              -2970.00
   }, 'javier', 'unhosted-project');
-  var res = display('Total to pay out later', {
+  var res = remoteStorage.money.display('Total to pay out later', {
     'Reserve for Krankenkasse Michiel': resMich
   });//this is a repeat
-  var dnr = display('Domain name registration', {
+  var dnr = remoteStorage.money.display('Domain name registration', {
     'DNR+Host \'unhosted.org\' godaddy            (11 sep)': 12.08,
     'DNR                     godaddy            (16 jan)': 7.70,
     'DNR                     godaddy            (20 jan)': 4.45,
@@ -41,7 +41,7 @@
     'DNR                     godaddy            (28 aug)': 19.27,
     'DNR                     godaddy            (2 sep)': 1.55
   }, 'michiel', 'unhosted-project');
-  var hosting = display('Hosting', {
+  var hosting = remoteStorage.money.display('Hosting', {
     'arsys             56.64         (15 dec)': 56.64,
     'godaddy            4.50         (20 dec)': 4.50,
     'arsys             17.70         (10 jan)': 17.70,
@@ -54,24 +54,24 @@
     'rackspace         22.92         (3 sep)': 22.92,
     'hostgator          5.09         (3 sep)': 5.09
   }, 'michiel', 'unhosted-project');
-  var promo = display('Online promotion', {
+  var promo = remoteStorage.money.display('Online promotion', {
     'advertising             google adwords    43.12         (4 dec)': 43.12,
     'advertising             google adwords    18.94         (4 jan)': 18.94,
     'advertising             google adwords     7.85         (2 feb)': 7.85,
     'advertising             google             7.84         3 mar': 7.84,
     'advertising             google             0.08         4 apr': 0.08
   }, 'michiel', 'unhosted-project');
-  var campaign = display('T-shirt campaign', {
+  var campaign = remoteStorage.money.display('T-shirt campaign', {
     'T-shirts':                                 586.99,
     'sdw Screen-printing workshop':             155.00,
     '50 big envelopes':                           9.00 
   }, 'michiel', 'unhosted-project');
-  var HH = display('Hacky Holidays Competition', {
+  var HH = remoteStorage.money.display('Hacky Holidays Competition', {
     'H.H. plugserver 1       globalscale':      84.74,
     'H.H. plugserver 2       globalscale':       82.07,
     'H.H. plugserver 3       codelathe llc':     82.00
   }, 'michiel', 'unhosted-project');
-  var travel = display('Travel', {
+  var travel = remoteStorage.money.display('Travel', {
     'travel madrid-donosti   alsa                   67.62         28 jan': 67.62,
     'bus Stockholm airport   flygbussarna           25.00         (mar)': 25,
     'travel bxl-Lille-bxl    B. Rail                48.00           apr': 48,
@@ -81,20 +81,20 @@
     'travel second visit nlnet: 8+10.80+2.40+1.40':   22.60,
     'travel rmll: 152.30+15car +140gas -205mitfahr': 102.30
   }, 'michiel', 'unhosted-project');
-  var acc = display('Accomodation', {
+  var acc = remoteStorage.money.display('Accomodation', {
     'wifi Rostock            T-mobile':               19.95,
     'wifi stockholm          the cloud':               4.49,
     'hotel lille             Premier Class':          40.00,
     'campsite RMLL':                                  20.00
   }, 'michiel', 'unhosted-project');
-  var conf = display('Conferences', {
+  var conf = remoteStorage.money.display('Conferences', {
     'ccc camp':                                      140.00,
     'registration fee        FSW2011                17.23        (7 may)': 17.23,
     'okcon                      ':                    30.00,
     'reject.js                                            (13 eur, will be paid through berliner bank)': 13,
     'jsconfeu-fun                                         (20 eur, will be paid through berliner bank)': 20
   }, 'michiel', 'unhosted-project');
-  var adm = display('Administration', {
+  var adm = remoteStorage.money.display('Administration', {
     'notary                  Seeger&Seeger          31.75         (apr)': 31.75,
     'e.V. registry                                  53.00         (4 jul)': 53,
     'setup fee               paypal                  1.50         (29 apr)': 1.5,
@@ -106,7 +106,7 @@
     'something paid directly from Berliner Bank': -33
   }, 'michiel', 'unhosted-project');
 
-  var reimb = display('Total to reimburse now to Michiel', {
+  var reimb = remoteStorage.money.display('Total to reimburse now to Michiel', {
     'freelancer invoice from Michiel after own donation': flMich,
     'freelancer invoice from Javier after own donation':  flJavi,
     'DNR':                                                              dnr,
@@ -120,7 +120,7 @@
     'Administration':                                                   adm,
     'paid directly from BerlinerBank':                                  paidDirectly
   });//this is a repeat
-  var balanceYearOne = display('Money we have at 9 Sept 2011', {
+  var balanceYearOne = remoteStorage.money.display('Money we have at 9 Sept 2011', {
     'at paypal':                                                       4077.80,
     'at Berliner Bank (minus 33 eur reject.js and jsconfeu)':           377.03,
     'at flattr':                                                        195.31,
@@ -131,7 +131,7 @@
 
   //START YEAR TWO:
 
-  display('money we need', {
+  remoteStorage.money.display('money we need', {
     'living expenses Code Communist':    12000,
     'living expenses Design Dictator':   12000,
     'krankenkasse Code Communist':        1800, 
@@ -146,11 +146,11 @@
     'misc':                                232,
     'travel, accomodation, conferences':  1000
   });//this is only budget
-  display('money we will have', {
+  remoteStorage.money.display('money we will have', {
     'from nlnet':                        30000,
     'need to find':                       6000
   });//this is only budget
-  var michSeptOct = display('Michiel sept/oct', {
+  var michSeptOct = remoteStorage.money.display('Michiel sept/oct', {
     '42 Unhost postcards to send with T-shirts (via Kenny): 42 * 20 CZK = 840 CZK': 35,
     'stamps for sending 27 T-shirt packages from Unhost: 1950 CZK': 80,
     'sending another 14 T-shirts: 2x Germany(1.45 EUR), 12x international(3.45 EUR)': 44.30,
@@ -171,10 +171,10 @@
     'received from nlnet': -2800
   }, 'michiel', 'unhosted-project');
   console.log('discrepancy: this seems to be missing entirely from the wiki');
-  var cancelResMich = display('cancelling reservation for Michiel', {
+  var cancelResMich = remoteStorage.money.display('cancelling reservation for Michiel', {
     'cancelling reservation for Krankenkasse Michiel, 1 Mar 2011 - 8 Sep 2011': -937.00
   }, 'unhosted-reserved', 'unhosted-project');
-  var michNovDec = display('Michiel Nov/Dev', {
+  var michNovDec = remoteStorage.money.display('Michiel Nov/Dev', {
     //'original summary (presumably the 1 Nov start balance?)': 3125.20,
     'mozfest (apart from travel to UK which was already in there)': 32.76,
     'visit to surfnet was 12+9+2 = 21 eur by train': 21,
@@ -186,7 +186,7 @@
     'received from nlnet': -2500
   }, 'michiel', 'unhosted-project');
   console.log('discrepency: wiki says 2476.56 at 1 Jan, instead of 2479.89, so 3.33 EUR less');
-  var michJanFeb = display('invoice Michiel for Jan/Feb 2012', {
+  var michJanFeb = remoteStorage.money.display('invoice Michiel for Jan/Feb 2012', {
     //'was owed': 2476.56,
     'received from govcert': -81.61,
     'living costs 9 Jan .. 9 Mar': 2000,
@@ -201,7 +201,7 @@
     'received from nlnet: 2000 euros (3 March)': -2000
   }, 'michiel', 'unhosted-project');
   console.log('discrepency: wiki says 2324.02 at 1 March, instead of 2327.25, so 3.13 EUR less');
-  var michMarApr = display('invoice Michiel for Mar/Apr 2012', {
+  var michMarApr = remoteStorage.money.display('invoice Michiel for Mar/Apr 2012', {
     'received from paypal 740 euros (17 Feb)': -740,
     'received from paypal: 690 euros (8 March)': -690,
     '03/02/2012  THE RACKSPACE CLOUD (210-581-0410 - Estados Unidos)':     11.07,
@@ -215,7 +215,7 @@
     'living expenses 9 Mar - 9 May': 2000,
     'received 2000 from nlnet (8 May)': -2000
   }, 'michiel', 'unhosted-project');
-  michMayJun = display('Michiel May-June', {
+  michMayJun = remoteStorage.money.display('Michiel May-June', {
     'received 100 cash from Jan': -100,
     'received 500 from nlnet for commit talk': -500,
     'travel CouchHack': 200,
@@ -223,13 +223,13 @@
     'predicted payment nlnet start of July': -5000+2667.24, 
     'predicted payment Michiel -> Hugo start of July': 556
   }, 'michiel', 'unhosted-project');
-  michJulAug = display('Michiel July-August', {
+  michJulAug = remoteStorage.money.display('Michiel July-August', {
     'predicted payment Michiel -> Hugo start of August': 500,
     'predicted payment Michiel -> Hugo start of September': 500,
     'living expenses 9 July - 9 Sep': 2000,
     'predicted payment nlnet start of September': -5000
   }, 'michiel', 'unhosted-project');
-  var michiel = display('Michiel balance', {
+  var michiel = remoteStorage.money.display('Michiel balance', {
     '9 sept 2011': 4613.82,
     'sept/oct': michSeptOct,
     'nov/dec': michNovDec,
@@ -242,7 +242,7 @@
 
   // START JAN
 
-  var janSepOct = display('Jan September–October', {
+  var janSepOct = remoteStorage.money.display('Jan September–October', {
     //2000 + 151.73 stickers + 6.85 copyshop = 2158.58 (received 2200, owing 41.42)
     'worked two months': 2000,
     'days co-up: 14,15 sept, 3 single tickets (paid through Berliner Bank)': 0,
@@ -253,7 +253,7 @@
     '6,85 copyshop for 24 Unhost postcards': 6.85,
     'received from nlnet': -2200
   }, 'jan', 'unhosted-project');
-  var janNovDec = display('Jan November–December', {
+  var janNovDec = remoteStorage.money.display('Jan November–December', {
     //: 2000 + 61.09 (7.85+7.40+6.30+4.54+35) = 2061.09 (received 2500, owed 41.42 last) owing 480.33
     'stamps for 3 more shirts (November 10)': 7.85,
     '(1.80+2.80+2.80) in local tickets to get to HamburgJS, to friend and back (~90 in DB tickets paid by HamburgJS, November 21)': 7.40,
@@ -264,14 +264,14 @@
     'worked two months': 2000,
     'received from nlnet': -2500
   }, 'jan', 'unhosted-project');
-  var janJanFeb = display('Jan Jan/Feb', {
+  var janJanFeb = remoteStorage.money.display('Jan Jan/Feb', {
     'health insurance, 215.26*4 for September–December, 221.15 after 2012 raise for January (February 15)': 1082.19,
     'health insurance abroad': 11,
     'liability insurance': 69.59,
     'worked two months': 2000,
     'received from nlnet': -3000
   }, 'jan', 'unhosted-project');
-  var janMarApr = display('Jan March/April', {
+  var janMarApr = remoteStorage.money.display('Jan March/April', {
     'sending two shirts (March 7)': 4.90,
     'bus tickets (5.00+2.70) getting into Amsterdam (hitchhiked there, March 7)': 7.70,
     '7.95 printing Unhosted readers for Unlike Us conf attendees (March 9)': 7.95,
@@ -288,7 +288,7 @@
     'worked two months': 2000,
     'received from nlnet (15 June)': -3000
   }, 'jan', 'unhosted-project');
-  var janMayJun = display('Jan May/June', {
+  var janMayJun = remoteStorage.money.display('Jan May/June', {
     'gave 100 cash to Michiel': 100,
     'health insurance for April (May 15)': 221.15,
     'health insurance for May (June 15)': 221.15,
@@ -306,14 +306,14 @@
     'predicted payment beginning of July from nlnet': -2667.24,
     'predicted payment 15 July: krankenkasse May': 221.15
   }, 'jan', 'unhosted-project');
-  var jan = display('Jan balance', {
+  var jan = remoteStorage.money.display('Jan balance', {
     'Sep/Oct': janSepOct,
     'Nov/Dec': janNovDec,
     'Jan/Feb': janJanFeb,
     'Mar/Apr': janMarApr,
     'May/Jun': janMayJun
   });
-  var hugo = display('Hugo ToS;DR internship', {
+  var hugo = remoteStorage.money.display('Hugo ToS;DR internship', {
     'internship May': 500,
     'co-up basic (20) + 3*12 extra days': 56,
     'predicted payment Michiel -> Hugo start of July': -556,
@@ -322,11 +322,11 @@
     'internship August': 500,
     'predicted payment Michiel -> Hugo start of September': -500
   }, 'hugo', 'unhosted-project');
-  var year3 = display('Reserved for year 3', {
+  var year3 = remoteStorage.money.display('Reserved for year 3', {
     'reserved for year 3': 3000
   }, 'unhosted-reserved', 'unhosted-project');
   console.log('*************************************');
-  display('grand total', {
+  remoteStorage.money.display('grand total', {
     'Michiel': michiel,
     'Jan': jan,
     'Hugo': hugo
@@ -335,6 +335,6 @@
   console.log('we will really need this in the third year, because the nlnet money (1000+1500 per month) will be spent entirely on living expenses of Michiel and Niklas, and there will be nothing left from that for any other expenses like desks, health insurance, and travel.');
   console.log('if we get money from other sources (Wau Holland Stiftung, Mozilla Foundation) then this can be used for the unhosted app dev boost fund, or whoever obtains the funds (in case of Wau Holland this would be Jan) can propose a goal to the donators and to the e.V. general meeting');
   console.log('*************************************');
-  displayBalances();
+  remoteStorage.money.displayBalances();
 </script></head><body>
 (see console log)
