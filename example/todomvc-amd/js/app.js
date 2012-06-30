@@ -21,7 +21,6 @@ function windowLoadHandler() {
 
       var todos;
       remoteStorage.displayWidget('remotestorage-connect');
-      remoteStorage.loadModule('tasks', '0.1', 'rw');
       todos = remoteStorage.tasks.getPrivateList('todos');
       todos.on('error', function(err) {
       });
