@@ -29,25 +29,25 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     myBaseClient.storeObject('IOUs/'+ower+'/'+owee+'/'+currency+'/'+uuid, true, 'IOU', {
       tag: tag,
       thing: thing,
-      amount: amount
+      amount: -amount
     });
     myBaseClient.storeObject('IOUs/'+owee+'/'+ower+'/'+currency+'/'+uuid, true, 'IOU', {
       tag: tag,
       thing: thing,
-      amount: -amount
+      amount: amount
     });
   }
   function display(name, items, owee, ower) {
     var sum=0;
     for(var thing in items) {
       console.log(' >>> '+thing+': '+itoa(items[thing])+' EUR');
+      if(owee && ower) {
+        addIOU(name, thing, items[thing], 'EUR', owee, ower);
+      }
       sum += items[thing];
     }
     sum = roundOff(sum);
     console.log(name+': '+itoa(sum)+' EUR');
-    if(owee && ower) {
-      addIOU(name, thing, items[thing], 'EUR', owee, ower);
-    }
     return sum;
   }
   function getBalance(personName, currency) {

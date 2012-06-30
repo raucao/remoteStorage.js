@@ -3,6 +3,7 @@
 <script src="../../build/latest/remoteStorage-debug.js"></script>
 <script src="../../src/modules/money-0.1.js"></script>
 <script>
+  localStorage.clear();
   remoteStorage.loadModule('money', '0.1', 'rw');
   var flMich = remoteStorage.money.display('Freelancer\'s invoice Michiel', {
     'full-time work allowance Michiel, 1 Nov 2010 - 15 Jan 2011':       2500.00,
