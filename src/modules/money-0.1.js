@@ -15,12 +15,12 @@ remoteStorage.defineModule('money', function(myBaseClient) {
   
   function addIOU(tag, thing, amount, currency, owee, ower) {
     var uuid = genUuid();
-    myBaseClient.storeObject('IOUs/'+ower+'/'+owee+'/'+currency+'/'+uuid, true, 'IOU', {
+    myBaseClient.storeObject('IOU', 'IOUs/'+ower+'/'+owee+'/'+currency+'/'+uuid, {
       tag: tag,
       thing: thing,
       amount: -amount
     });
-    myBaseClient.storeObject('IOUs/'+owee+'/'+ower+'/'+currency+'/'+uuid, true, 'IOU', {
+    myBaseClient.storeObject('IOU', 'IOUs/'+owee+'/'+ower+'/'+currency+'/'+uuid, {
       tag: tag,
       thing: thing,
       amount: amount
@@ -70,7 +70,7 @@ remoteStorage.defineModule('money', function(myBaseClient) {
   function setBalance(date, peer, amount, currency) {
     var obj={};
     obj[currency]=amount;
-    myBaseClient.storeObject(date+'/0/'+peer+'/balance', false, 'balance', obj);
+    myBaseClient.storeObject('balance', date+'/0/'+peer+'/balance', obj);
   }
   return {
     name: 'money',

@@ -49,14 +49,14 @@ remoteStorage.defineModule('documents', function(myBaseClient) {
       if(content == '') {
         myBaseClient.remove(listName+'/'+id);
       } else {
-        myBaseClient.storeObject(listName+'/'+id, false, 'documents/text', {
+        myBaseClient.storeObject('text', listName+'/'+id, {
           content: content
         });
       }
     }
     function add(content) {
       var id = getUuid();
-      myBaseClient.storeObject(listName+'/'+id, false, 'documents/text', {
+      myBaseClient.storeObject('text', listName+'/'+id, {
         content: content
       });
       return id;

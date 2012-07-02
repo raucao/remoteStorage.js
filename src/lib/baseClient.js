@@ -70,8 +70,8 @@ define(['./sync', './store'], function (sync, store) {
           }
         },
         getObject    : function(path, cb) {
+          var absPath = makePath(path);
           if(cb) {
-            var absPath = makePath(path);
             sync.fetchNow(absPath, function(err) {
               var node = store.getNode(absPath);
               cb(node.data);
@@ -82,21 +82,20 @@ define(['./sync', './store'], function (sync, store) {
           }
         },
         getListing    : function(path, cb) {
+          var absPath = makePath(path);
           if(cb) {
-            var absPath = makePath(path);
             sync.fetchNow(absPath, function(err) {
               var node = store.getNode(absPath);
               cb(node.data);
             });
           } else {
-            var absPath = makePath(path);
             var node = store.getNode(absPath);
             return node.data;
           }
         },
         getMedia    : function(path, cb) {
+          var absPath = makePath(path);
           if(cb) {
-            var absPath = makePath(path);
             sync.fetchNow(absPath, function(err) {
               var node = store.getNode(absPath);
               cb({
