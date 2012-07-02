@@ -1586,16 +1586,17 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
       }
     }
   }
-  function fireChange(eventObj) {
-    var moduleName = extractModuleName(eventObj.path);
+  function fireChange(moduleName, eventObj) {
     if(moduleName && moduleChangeHandlers[moduleName]) {
       for(var i=0; i<moduleChangeHandlers[moduleName].length; i++) {
         moduleChangeHandlers[moduleName][i](eventObj);
       }
     }
   }
-  store.on('change', fireChange);//tab-, device- and cloud-based changes all get fired from the store.
-
+  store.on('change', function(e) {
+    var moduleName = extractModuleName(eventObj.path);
+    fireChange(moduleName, e);//tab-, device- and cloud-based changes all get fired from the store.
+  });
   function set(moduleName, version, path, public, userAddress, valueStr) {
     var absPath = makePath(moduleName, version, path, public, userAddress),
       node = store.getNode(absPath);
@@ -1608,7 +1609,7 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
     };
     node.data = valueStr;
     var ret = store.updateNode(absPath, node);
-    fireChange(changeEvent);
+    fireChange(moduleName, changeEvent);
     return ret; 
   }
   function makePath(moduleName, version, path, public, userAddress) {
