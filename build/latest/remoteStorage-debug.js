@@ -984,10 +984,10 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
     }
     return memCache[key];
   }
-  function discoverStorageInfo(cb) {
-    webfinger.getStorageInfo(get('userAddress'), {}, function(err, data) {
+  function discoverStorageInfo(userAddress, cb) {
+    webfinger.getStorageInfo(userAddress, {}, function(err, data) {
       if(err) {
-        hardcoded.guessStorageInfo(get('userAddress'), {}, function(err2, data2) {
+        hardcoded.guessStorageInfo(userAddress, {}, function(err2, data2) {
           if(err2) {
             cb(err2);
           } else {
@@ -1042,7 +1042,7 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
     
     platform.setLocation(endPointParts[0]+'?'+queryParams.join('&'));
   }
-  function setUserAddress(userAddress) {
+  function discoverStorageInfo(userAddress) {
     set('userAddress', userAddress);
     discoverStorageInfo(function(err) {
       if(err) {
@@ -1059,8 +1059,10 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
       set('bearerToken', tokenHarvested);
     }
   }
-  function disconnect() {
-    localStorage.clear();
+  function disconnectRemote() {
+    set('storageType', undefined);
+    set('storageHref', undefined);
+    set('bearerToken', undefined);
   }
   function addScope(scope) {
     var scopes = get('scopes') || {};
@@ -1094,14 +1096,16 @@ define('lib/session',['./platform', './webfinger', './hardcoded'], function(plat
   onLoad();
   
   return {
-    setUserAddress   : setUserAddress,
-    getUserAddress   : function() { return get('userAddress'); },
-    getStorageInfo   : function() { return get('storageInfo'); },
+    setStorageInfo   : function(type, href) { set('storageType', type); set('storageHref', href); },
+    getStorageType   : function() { return get('storageType'); },
+    getStorageHref   : function() { return get('storageHref'); },
+    
+    setBearerToken   : function(bearerToken) { set('bearerToken', bearerToken); },
     getBearerToken   : function() { return get('bearerToken'); },
-    disconnect       : disconnect,
-    addScope : addScope,
-    getState : getState,
-    on : on
+    
+    disconnectRemote : disconnectRemote,
+    on               : on,
+    getState         : getState
   }
 });
 
@@ -1458,7 +1462,8 @@ define('lib/widget',['./session', './sync', './platform'], function (session, sy
       +'#remotestorage-state.connected #remotestorage-cube:hover+#remotestorage-disconnect, #remotestorage-state.busy #remotestorage-cube:hover+#remotestorage-disconnect, #remotestorage-state.offline #remotestorage-cube:hover+#remotestorage-disconnect { display:inline; }\n',
     locale='en',
     connectElement,
-    widgetState;
+    widgetState,
+    userAddress;
   function translate(text) {
     return text;
   }
@@ -1495,7 +1500,7 @@ define('lib/widget',['./session', './sync', './platform'], function (session, sy
   }
   function setWidgetState(state) {
     widgetState = state;
-    displayWidgetState(state, session.getUserAddress());
+    displayWidgetState(state, userAddress);
   }
   function displayWidgetState(state, userAddress) {
     if(!localStorage.boldlyGo) {
@@ -1535,7 +1540,8 @@ define('lib/widget',['./session', './sync', './platform'], function (session, sy
   }
   function handleConnectButtonClick() {
     if(widgetState == 'typing') {
-      session.setUserAddress(platform.getElementValue('remotestorage-useraddress'));
+      userAddress = platform.getElementValue('remotestorage-useraddress');
+      session.discoverStorageInfo(userAdddress, function(err) {});
     } else {
       setWidgetState('typing');
     }
@@ -1568,9 +1574,11 @@ define('lib/widget',['./session', './sync', './platform'], function (session, sy
     session.on('state', setWidgetState);
     setWidgetStateOnLoad();
   }
-
+  function addScope(module, mode) {
+  }
   return {
-    display : display
+    display : display,
+    addScope: addScope
   };
 });
 
@@ -1597,9 +1605,8 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
     var moduleName = extractModuleName(eventObj.path);
     fireChange(moduleName, e);//tab-, device- and cloud-based changes all get fired from the store.
   });
-  function set(moduleName, version, path, public, userAddress, valueStr) {
-    var absPath = makePath(moduleName, version, path, public, userAddress),
-      node = store.getNode(absPath);
+  function set(absPath, valueStr) {
+    var  node = store.getNode(absPath);
     node.outgoingChange = true;
     var changeEvent = {
       origin: 'window',
@@ -1611,9 +1618,6 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
     var ret = store.updateNode(absPath, node);
     fireChange(moduleName, changeEvent);
     return ret; 
-  }
-  function makePath(moduleName, version, path, public, userAddress) {
-    return (userAddress ?'//'+userAddress:'/')+(public?'public/':'')+moduleName+'/'+version+'/'+path;
   }
   function claimAccess(path, claim) {
     var node = store.getNode(path);
@@ -1630,7 +1634,10 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
   }
   return {
     claimAccess: claimAccess,
-    getInstance : function(moduleName, version, accessClaim) {
+    getInstance : function(moduleName, public) {
+      function makePath(path) {
+        return (public?'/public/':'/')+moduleName+'/'+path;
+      }
       return {
         on          : function(eventType, cb) {//'error' or 'change'. Change events have a path and origin (tab, device, cloud) field
           if(eventType=='change') {
@@ -1642,37 +1649,70 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
             }
           }
         },
-        get         : function(path, public, userAddress, cb) {
+        getObject    : function(path, cb) {
           if(cb) {
-            sync.fetchNow(makePath(moduleName, version, path, public, userAddress), function(err) {
-              var node = store.getNode(makePath(moduleName, version, path, public, userAddress));
+            var absPath = makePath(path);
+            sync.fetchNow(absPath, function(err) {
+              var node = store.getNode(absPath);
               cb(node.data);
             });
           } else {
-            var node = store.getNode(makePath(moduleName, version, path, public, userAddress));
+            var node = store.getNode(absPath);
             return node.data;
           }
         },
-        remove      : function(path, public) {
-          return set(moduleName, version, path, public);
+        getListing    : function(path, cb) {
+          if(cb) {
+            var absPath = makePath(path);
+            sync.fetchNow(absPath, function(err) {
+              var node = store.getNode(absPath);
+              cb(node.data);
+            });
+          } else {
+            var node = store.getNode(absPath);
+            return node.data;
+          }
+        },
+        getMedia    : function(path, cb) {
+          if(cb) {
+            var absPath = makePath(path);
+            sync.fetchNow(absPath, function(err) {
+              var node = store.getNode(absPath);
+              cb({
+                mimeType: node.mimeType,
+                data: node.data
+              });
+            });
+          } else {
+            var node = store.getNode(absPath);
+            return {
+              mimeType: node.mimeType,
+              data: node.data
+            };
+          }
+        },
+        remove      : function(path) {
+          return set(makePath(path));
         },
         
-        storeObject : function(path, public, type, obj) {
+        storeObject : function(type, path, obj) {
           obj['@type'] = 'https://remotestoragejs.com/spec/modules/'+type;
           //checkFields(obj);
-          return set(moduleName, version, path, public, undefined, JSON.stringify(obj));
+          return set(makePath(path), JSON.stringify(obj), 'application/json');
         },
-        storeMedia  : function(path, mimeType, data) {
-          return set(moduleName, version, path, public, undefined, data);
+        storeMedia  : function(mimeType, path, data) {
+          return set(makePath(path), data, mimeType);
         },
-        
-        connect     : function(path, public, userAddress, switchVal) {
-          var absPath = makePath(moduleName, version, path, public, userAddress);
+        getCurrentWebRoot : function() {
+          return 'https://example.com/this/is/an/example/'+(public?'public/':'')+moduleName+'/';
+        },
+        sync        : function(path, switchVal) {
+          var absPath = makePath(path);
           var node = store.getNode(absPath);
           node.startForcing = (switchVal != false);
           store.updateNode(absPath, node);
         },
-        getState    : function(path, public, userAddress, switchVal) {
+        getState    : function(path) {
         }
       };
     }
@@ -1680,49 +1720,40 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
 });
 
 define('remoteStorage',['require', './lib/platform', './lib/couch', './lib/dav', './lib/getputdelete', './lib/webfinger', './lib/hardcoded', './lib/session', './lib/widget',
-    './lib/baseClient', './lib/wireClient'],
-  function (require, platform, couch, dav, getputdelete, webfinger, hardcoded, session, widget, baseClient, wireClient) {
+    './lib/baseClient', './lib/wireClient', './lib/sync'],
+  function (require, platform, couch, dav, getputdelete, webfinger, hardcoded, session, widget, baseClient, wireClient, sync) {
     var modules = {},
-      defineModule = function(moduleName, version, module) {
-        modules[moduleName+'-'+version] = module(baseClient.getInstance(moduleName, version));
+      moduleVersions = {},
+      defineModule = function(moduleName, builder) {
+        modules[moduleName] = builder(baseClient.getInstance(moduleName, false), baseClient.getInstance(moduleName, true));
       },
-      addScope = function(path, mode) {
-        session.addScope(path+':'+mode);
-        baseClient.claimAccess(path, mode);
-      },
-      loadModule = function(moduleName, version, mode) {
+      loadModule = function(moduleName, mode) {
         if(this[moduleName]) {
-          return;
+          return moduleVersions[moduleName];
         }
-        this[moduleName] = modules[moduleName+'-'+version].exports;
-        if(mode != 'r') {
-          mode='rw';
+        this[moduleName] = modules[moduleName].exports;
+        moduleVersions[moduleName] = modules[moduleName].version;
+        if(moduleName == 'root') {
+          moduleName = '';
+          widget.addScope('/', mode);
+        } else {
+          widget.addScope('/'+moduleName+'/', mode);
+          widget.addScope('/public/'+moduleName+'/', mode);
         }
-        if(mode == 'rw') {
-          addScope('/'+moduleName+'/'+version+'/', mode);
-          addScope('/public/'+moduleName+'/'+version+'/', mode);
-        }
-        addScope('/'+moduleName+'/', 'r');
-        addScope('/public/'+moduleName+'/', 'r');
-      },
-      loadModuleAsync = function(moduleName, version, mode, cb) {
-        var moduleXhr = new XMLHttpRequest();
-        var remoteStorage = this;
-        moduleXhr.open('GET', '../../src/modules/tasks-0.1.js', true);
-        moduleXhr.onreadystatechange = function() {
-          if(moduleXhr.readyState == 4 && moduleXhr.status == 200) {
-            eval(moduleXhr.responseText);//how to do this properly? if you know, please send a pull request! :)      
-            loadModule(moduleName, version, mode);
-            cb();
-          }
-        };
-        moduleXhr.send();
+        return moduleVersions[moduleName];
       };
   return {
-    displayWidget   : widget.display,
     defineModule    : defineModule,
     loadModule      : loadModule,
-    loadModuleAsync : loadModuleAsync
+    displayWidget   : widget.display,
+    setStorageInfo  : session.setStorageInfo,
+    setBearerToken  : function(bearerToken, claimedScopes) {
+      session.setBearerToken(bearerToken);
+      baseClient.claimScopes(claimedScopes);
+    },
+    disconnectRemote: session.disconnectRemote,
+    flushLocal      : session.flushLocal,
+    syncNow         : sync.syncNow
   };
 });
 

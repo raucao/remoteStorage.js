@@ -23,10 +23,10 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
     }
     return memCache[key];
   }
-  function discoverStorageInfo(cb) {
-    webfinger.getStorageInfo(get('userAddress'), {}, function(err, data) {
+  function discoverStorageInfo(userAddress, cb) {
+    webfinger.getStorageInfo(userAddress, {}, function(err, data) {
       if(err) {
-        hardcoded.guessStorageInfo(get('userAddress'), {}, function(err2, data2) {
+        hardcoded.guessStorageInfo(userAddress, {}, function(err2, data2) {
           if(err2) {
             cb(err2);
           } else {
@@ -81,7 +81,7 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
     
     platform.setLocation(endPointParts[0]+'?'+queryParams.join('&'));
   }
-  function setUserAddress(userAddress) {
+  function discoverStorageInfo(userAddress) {
     set('userAddress', userAddress);
     discoverStorageInfo(function(err) {
       if(err) {
@@ -98,8 +98,10 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
       set('bearerToken', tokenHarvested);
     }
   }
-  function disconnect() {
-    localStorage.clear();
+  function disconnectRemote() {
+    set('storageType', undefined);
+    set('storageHref', undefined);
+    set('bearerToken', undefined);
   }
   function addScope(scope) {
     var scopes = get('scopes') || {};
@@ -133,13 +135,15 @@ define(['./platform', './webfinger', './hardcoded'], function(platform, webfinge
   onLoad();
   
   return {
-    setUserAddress   : setUserAddress,
-    getUserAddress   : function() { return get('userAddress'); },
-    getStorageInfo   : function() { return get('storageInfo'); },
+    setStorageInfo   : function(type, href) { set('storageType', type); set('storageHref', href); },
+    getStorageType   : function() { return get('storageType'); },
+    getStorageHref   : function() { return get('storageHref'); },
+    
+    setBearerToken   : function(bearerToken) { set('bearerToken', bearerToken); },
     getBearerToken   : function() { return get('bearerToken'); },
-    disconnect       : disconnect,
-    addScope : addScope,
-    getState : getState,
-    on : on
+    
+    disconnectRemote : disconnectRemote,
+    on               : on,
+    getState         : getState
   }
 });

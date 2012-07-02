@@ -21,9 +21,8 @@ define(['./sync', './store'], function (sync, store) {
     var moduleName = extractModuleName(eventObj.path);
     fireChange(moduleName, e);//tab-, device- and cloud-based changes all get fired from the store.
   });
-  function set(moduleName, version, path, public, userAddress, valueStr) {
-    var absPath = makePath(moduleName, version, path, public, userAddress),
-      node = store.getNode(absPath);
+  function set(absPath, valueStr) {
+    var  node = store.getNode(absPath);
     node.outgoingChange = true;
     var changeEvent = {
       origin: 'window',
@@ -35,9 +34,6 @@ define(['./sync', './store'], function (sync, store) {
     var ret = store.updateNode(absPath, node);
     fireChange(moduleName, changeEvent);
     return ret; 
-  }
-  function makePath(moduleName, version, path, public, userAddress) {
-    return (userAddress ?'//'+userAddress:'/')+(public?'public/':'')+moduleName+'/'+version+'/'+path;
   }
   function claimAccess(path, claim) {
     var node = store.getNode(path);
@@ -54,7 +50,10 @@ define(['./sync', './store'], function (sync, store) {
   }
   return {
     claimAccess: claimAccess,
-    getInstance : function(moduleName, version, accessClaim) {
+    getInstance : function(moduleName, public) {
+      function makePath(path) {
+        return (public?'/public/':'/')+moduleName+'/'+path;
+      }
       return {
         on          : function(eventType, cb) {//'error' or 'change'. Change events have a path and origin (tab, device, cloud) field
           if(eventType=='change') {
@@ -66,37 +65,70 @@ define(['./sync', './store'], function (sync, store) {
             }
           }
         },
-        get         : function(path, public, userAddress, cb) {
+        getObject    : function(path, cb) {
           if(cb) {
-            sync.fetchNow(makePath(moduleName, version, path, public, userAddress), function(err) {
-              var node = store.getNode(makePath(moduleName, version, path, public, userAddress));
+            var absPath = makePath(path);
+            sync.fetchNow(absPath, function(err) {
+              var node = store.getNode(absPath);
               cb(node.data);
             });
           } else {
-            var node = store.getNode(makePath(moduleName, version, path, public, userAddress));
+            var node = store.getNode(absPath);
             return node.data;
           }
         },
-        remove      : function(path, public) {
-          return set(moduleName, version, path, public);
+        getListing    : function(path, cb) {
+          if(cb) {
+            var absPath = makePath(path);
+            sync.fetchNow(absPath, function(err) {
+              var node = store.getNode(absPath);
+              cb(node.data);
+            });
+          } else {
+            var node = store.getNode(absPath);
+            return node.data;
+          }
+        },
+        getMedia    : function(path, cb) {
+          if(cb) {
+            var absPath = makePath(path);
+            sync.fetchNow(absPath, function(err) {
+              var node = store.getNode(absPath);
+              cb({
+                mimeType: node.mimeType,
+                data: node.data
+              });
+            });
+          } else {
+            var node = store.getNode(absPath);
+            return {
+              mimeType: node.mimeType,
+              data: node.data
+            };
+          }
+        },
+        remove      : function(path) {
+          return set(makePath(path));
         },
         
-        storeObject : function(path, public, type, obj) {
+        storeObject : function(type, path, obj) {
           obj['@type'] = 'https://remotestoragejs.com/spec/modules/'+type;
           //checkFields(obj);
-          return set(moduleName, version, path, public, undefined, JSON.stringify(obj));
+          return set(makePath(path), JSON.stringify(obj), 'application/json');
         },
-        storeMedia  : function(path, mimeType, data) {
-          return set(moduleName, version, path, public, undefined, data);
+        storeMedia  : function(mimeType, path, data) {
+          return set(makePath(path), data, mimeType);
         },
-        
-        connect     : function(path, public, userAddress, switchVal) {
-          var absPath = makePath(moduleName, version, path, public, userAddress);
+        getCurrentWebRoot : function() {
+          return 'https://example.com/this/is/an/example/'+(public?'public/':'')+moduleName+'/';
+        },
+        sync        : function(path, switchVal) {
+          var absPath = makePath(path);
           var node = store.getNode(absPath);
           node.startForcing = (switchVal != false);
           store.updateNode(absPath, node);
         },
-        getState    : function(path, public, userAddress, switchVal) {
+        getState    : function(path) {
         }
       };
     }

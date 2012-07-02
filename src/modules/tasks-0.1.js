@@ -1,4 +1,4 @@
-remoteStorage.defineModule('tasks', '0.1', function(myBaseClient) {
+remoteStorage.defineModule('tasks', function(myPrivateBaseClient, myPublicBaseClient) {
   var errorHandlers=[];
   function fire(eventType, eventObj) {
     if(eventType == 'error') {
@@ -22,35 +22,21 @@ remoteStorage.defineModule('tasks', '0.1', function(myBaseClient) {
     return uuid;
   }
   function getPrivateList(listName) {
-    myBaseClient.connect(listName+'/');
+    myPrivateBaseClient.sync(listName+'/');
     function getIds() {
-      var myHashmap= myBaseClient.get(listName+'/'), myArray=[];
-      for(var i in myHashmap) {
-        myArray.push(i);
-      }
-      return myArray;
+      return myPrivateBaseClient.getListing(listName+'/'), myArray=[];
     }
     function get(id) {
-      var valueStr = myBaseClient.get(listName+'/'+id);
-      if(valueStr) {
-        try {
-          var obj = JSON.parse(valueStr);
-          obj.id = id;
-          return obj;
-        } catch(e) {
-          fire('error', e);
-        }
-      }
-      return undefined;
+      return myPrivateBaseClient.getObject(listName+'/'+id);
     }
     function set(id, title) {
-      var obj = JSON.parse(myBaseClient.get(listName+'/'+id));
+      var obj = myPrivateBaseClient.getObject(listName+'/'+id);
       obj.title = title;
-      myBaseClient.storeObject(listName+'/'+id, false, 'tasks/task', obj);
+      myPrivateBaseClient.storeObject('task', listName+'/'+id, obj);
     }
     function add(title) {
       var id = getUuid();
-      myBaseClient.storeObject(listName+'/'+id, false, 'tasks/task', {
+      myPrivateBaseClient.storeObject('task', listName+'/'+id, {
         title: title,
         completed: false
       });
@@ -60,17 +46,10 @@ remoteStorage.defineModule('tasks', '0.1', function(myBaseClient) {
       if(typeof(completedVal) == 'undefined') {
         completedVal = true;
       }
-      var objStr = myBaseClient.get(listName+'/'+id);
-      if(objStr) {
-        try {
-          var obj = JSON.parse(objStr);
-          if(obj && obj.completed != completedVal) {
-            obj.completed = completedVal;
-            myBaseClient.storeObject(listName+'/'+id, false, 'tasks/task', obj);
-          }
-        } catch(e) {
-          fire('error', e);
-        }
+      var obj = myPrivateBaseClient.getObject(listName+'/'+id);
+      if(obj && obj.completed != completedVal) {
+        obj.completed = completedVal;
+        myPrivateBaseClient.storeObject('task', listName+'/'+id, obj);
       }
     }
     function isCompleted(id) {
@@ -92,10 +71,10 @@ remoteStorage.defineModule('tasks', '0.1', function(myBaseClient) {
       return stat;
     }
     function remove(id) {
-      myBaseClient.remove(listName+'/'+id);
+      myPrivateBaseClient.remove(listName+'/'+id);
     }
     function on(eventType, cb) {
-      myBaseClient.on(eventType, cb);
+      myPrivateBaseClient.on(eventType, cb);
       if(eventType == 'error') {
         errorHandlers.push(cb);
       }

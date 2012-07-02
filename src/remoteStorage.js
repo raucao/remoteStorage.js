@@ -1,47 +1,38 @@
 define(
   ['require', './lib/platform', './lib/couch', './lib/dav', './lib/getputdelete', './lib/webfinger', './lib/hardcoded', './lib/session', './lib/widget',
-    './lib/baseClient', './lib/wireClient'],
-  function (require, platform, couch, dav, getputdelete, webfinger, hardcoded, session, widget, baseClient, wireClient) {
+    './lib/baseClient', './lib/wireClient', './lib/sync'],
+  function (require, platform, couch, dav, getputdelete, webfinger, hardcoded, session, widget, baseClient, wireClient, sync) {
     var modules = {},
-      defineModule = function(moduleName, version, module) {
-        modules[moduleName+'-'+version] = module(baseClient.getInstance(moduleName, version));
+      moduleVersions = {},
+      defineModule = function(moduleName, builder) {
+        modules[moduleName] = builder(baseClient.getInstance(moduleName, false), baseClient.getInstance(moduleName, true));
       },
-      addScope = function(path, mode) {
-        session.addScope(path+':'+mode);
-        baseClient.claimAccess(path, mode);
-      },
-      loadModule = function(moduleName, version, mode) {
+      loadModule = function(moduleName, mode) {
         if(this[moduleName]) {
-          return;
+          return moduleVersions[moduleName];
         }
-        this[moduleName] = modules[moduleName+'-'+version].exports;
-        if(mode != 'r') {
-          mode='rw';
+        this[moduleName] = modules[moduleName].exports;
+        moduleVersions[moduleName] = modules[moduleName].version;
+        if(moduleName == 'root') {
+          moduleName = '';
+          widget.addScope('/', mode);
+        } else {
+          widget.addScope('/'+moduleName+'/', mode);
+          widget.addScope('/public/'+moduleName+'/', mode);
         }
-        if(mode == 'rw') {
-          addScope('/'+moduleName+'/'+version+'/', mode);
-          addScope('/public/'+moduleName+'/'+version+'/', mode);
-        }
-        addScope('/'+moduleName+'/', 'r');
-        addScope('/public/'+moduleName+'/', 'r');
-      },
-      loadModuleAsync = function(moduleName, version, mode, cb) {
-        var moduleXhr = new XMLHttpRequest();
-        var remoteStorage = this;
-        moduleXhr.open('GET', '../../src/modules/tasks-0.1.js', true);
-        moduleXhr.onreadystatechange = function() {
-          if(moduleXhr.readyState == 4 && moduleXhr.status == 200) {
-            eval(moduleXhr.responseText);//how to do this properly? if you know, please send a pull request! :)      
-            loadModule(moduleName, version, mode);
-            cb();
-          }
-        };
-        moduleXhr.send();
+        return moduleVersions[moduleName];
       };
   return {
-    displayWidget   : widget.display,
     defineModule    : defineModule,
     loadModule      : loadModule,
-    loadModuleAsync : loadModuleAsync
+    displayWidget   : widget.display,
+    setStorageInfo  : session.setStorageInfo,
+    setBearerToken  : function(bearerToken, claimedScopes) {
+      session.setBearerToken(bearerToken);
+      baseClient.claimScopes(claimedScopes);
+    },
+    disconnectRemote: session.disconnectRemote,
+    flushLocal      : session.flushLocal,
+    syncNow         : sync.syncNow
   };
 });

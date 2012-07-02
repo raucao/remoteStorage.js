@@ -59,7 +59,8 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
       +'#remotestorage-state.connected #remotestorage-cube:hover+#remotestorage-disconnect, #remotestorage-state.busy #remotestorage-cube:hover+#remotestorage-disconnect, #remotestorage-state.offline #remotestorage-cube:hover+#remotestorage-disconnect { display:inline; }\n',
     locale='en',
     connectElement,
-    widgetState;
+    widgetState,
+    userAddress;
   function translate(text) {
     return text;
   }
@@ -96,7 +97,7 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
   }
   function setWidgetState(state) {
     widgetState = state;
-    displayWidgetState(state, session.getUserAddress());
+    displayWidgetState(state, userAddress);
   }
   function displayWidgetState(state, userAddress) {
     if(!localStorage.boldlyGo) {
@@ -136,7 +137,8 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
   }
   function handleConnectButtonClick() {
     if(widgetState == 'typing') {
-      session.setUserAddress(platform.getElementValue('remotestorage-useraddress'));
+      userAddress = platform.getElementValue('remotestorage-useraddress');
+      session.discoverStorageInfo(userAdddress, function(err) {});
     } else {
       setWidgetState('typing');
     }
@@ -169,8 +171,10 @@ define(['./session', './sync', './platform'], function (session, sync, platform)
     session.on('state', setWidgetState);
     setWidgetStateOnLoad();
   }
-
+  function addScope(module, mode) {
+  }
   return {
-    display : display
+    display : display,
+    addScope: addScope
   };
 });
