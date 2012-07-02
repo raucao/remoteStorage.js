@@ -1,3 +1,9 @@
+0.7.0
+=====
+* big breaking change!
+* introduces modules, and changes everything completely.
+* nothing is the same as in version 0.6
+
 0.6.9
 =====
 * update new webfinger format

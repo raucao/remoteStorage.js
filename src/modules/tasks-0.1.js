@@ -43,7 +43,9 @@ remoteStorage.defineModule('tasks', '0.1', function(myBaseClient) {
       }
       return undefined;
     }
-    function set(id, obj) {
+    function set(id, title) {
+      var obj = JSON.parse(myBaseClient.get(listName+'/'+id));
+      obj.title = title;
       myBaseClient.storeObject(listName+'/'+id, false, 'tasks/task', obj);
     }
     function add(title) {
