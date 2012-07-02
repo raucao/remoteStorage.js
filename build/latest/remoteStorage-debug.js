@@ -1164,6 +1164,9 @@ define('lib/store',[], function () {
     return value;
   }
   function isDir(path) {
+    if(typeof(path) != 'string') {
+      doSomething();
+    }
     return path.substr(-1) == '/';
   }
   function getContainingDir(path) {
@@ -1612,10 +1615,11 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
       origin: 'window',
       oldValue: node.data,
       newValue: valueStr,
-      path: path
+      path: absPath
     };
     node.data = valueStr;
     var ret = store.updateNode(absPath, node);
+    var moduleName = extractModuleName(absPath);
     fireChange(moduleName, changeEvent);
     return ret; 
   }
@@ -1630,6 +1634,9 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
     }
   }
   function isDir(path) {
+    if(typeof(path) != 'string') {
+      doSomething();
+    }
     return (path.substr(-1)=='/');
   }
   return {
@@ -1669,6 +1676,7 @@ define('lib/baseClient',['./sync', './store'], function (sync, store) {
               cb(node.data);
             });
           } else {
+            var absPath = makePath(path);
             var node = store.getNode(absPath);
             return node.data;
           }

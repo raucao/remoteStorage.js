@@ -1,4 +1,4 @@
-remoteStorage.defineModule('documents', '0.1', function(myBaseClient) {
+remoteStorage.defineModule('documents', function(myBaseClient) {
   var errorHandlers=[];
   function fire(eventType, eventObj) {
     if(eventType == 'error') {

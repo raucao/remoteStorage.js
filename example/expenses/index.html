@@ -4,7 +4,7 @@
 <script src="../../src/modules/money-0.1.js"></script>
 <script>
   localStorage.clear();
-  remoteStorage.loadModule('money', '0.1', 'rw');
+  remoteStorage.loadModule('money', 'rw');
   bulkDeclaration('michiel', '2011/09/09', {
     'full-time work allowance Michiel, 1 Nov 2010 - 15 Jan 2011':       2500.00,
     'full-time work allowance Michiel, 1 Mar 2011 - 8 Sep 2011':        6250.00,
@@ -257,7 +257,10 @@
   declaration('hugo', '2012/05/04', 'co-up basic + 3 days', 20+3*12);
   declaration('martin', '2012/05/04', 'co-up basic', 20);
   //transfer('unhosted-project', 'unhosted-reserved', '2012/09/09', 3000, 'EUR');
-  
+
+  transfer('michiel', 'hugo', '2012/07/02', 556, 'EUR');
+  transfer('michiel', 'martin', '2012/07/02', 20, 'EUR');
+
   console.log('************************');
   function itoa(i) {
     var wholes = Math.floor(i);

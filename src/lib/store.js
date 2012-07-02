@@ -53,6 +53,9 @@ define([], function () {
     return value;
   }
   function isDir(path) {
+    if(typeof(path) != 'string') {
+      doSomething();
+    }
     return path.substr(-1) == '/';
   }
   function getContainingDir(path) {

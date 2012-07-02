@@ -1,4 +1,4 @@
-remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
+remoteStorage.defineModule('money', function(myBaseClient) {
   function genUuid() {
     var uuid = '',
       i,
@@ -35,13 +35,13 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     addIOU(date, 'transfer', amount, currency, to, from);
   }
   function getBalance(personName, currency) {
-    var peers = myBaseClient.get('IOUs/'+personName+'/', true),
+    var peers = myBaseClient.getListing('IOUs/'+personName+'/'),
       balance = 0;
     for(var i in peers) {
       var thisPeerBalance = 0;
-      var thisPeerIOUs = myBaseClient.get('IOUs/'+personName+'/'+i+currency+'/', true);
+      var thisPeerIOUs = myBaseClient.getListing('IOUs/'+personName+'/'+i+currency+'/');
       for(var j in thisPeerIOUs) {
-        var thisIOU = JSON.parse(myBaseClient.get('IOUs/'+personName+'/'+i+currency+'/'+j, true));
+        var thisIOU = myBaseClient.getObject('IOUs/'+personName+'/'+i+currency+'/'+j);
         //console.log(personName+'-'+i+':'+j+' '+typeof(thisPeerBalance));
         thisPeerBalance += thisIOU.amount;
       }
@@ -50,7 +50,7 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
     return balance;
   }
   function getBalances2(currency) {
-    var peers = myBaseClient.get('IOUs/', true);
+    var peers = myBaseClient.getListing('IOUs/');
     var balances = {};
     for(var i in peers) {
       var peerName = i.substring(0, i.length-1);
@@ -60,10 +60,10 @@ remoteStorage.defineModule('money', '0.1', function(myBaseClient) {
   }
   function getBalances(date, currency) {
     var balances={};
-    var peers=myBaseClient.get(date+'/0/');
+    var peers=myBaseClient.getListing(date+'/0/');
     for(var i in peers) {
       var peerName = i.substring(0, i.length-1);
-      balances[peerName]=JSON.parse(myBaseClient.get(date+'/0/'+i+'balance'))[currency];
+      balances[peerName] = myBaseClient.getObject(date+'/0/'+i+'balance')[currency];
     }
     return balances;
   }
