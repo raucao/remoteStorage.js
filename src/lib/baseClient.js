@@ -124,7 +124,7 @@ define(['./sync', './store'], function (sync, store) {
         },
         
         storeObject : function(type, path, obj) {
-          obj['@type'] = 'https://remotestoragejs.com/spec/modules/'+type;
+          obj['@type'] = 'https://remotestoragejs.com/spec/modules/'+moduleName+'/'+type;
           //checkFields(obj);
           return set(makePath(path), obj, 'application/json');
         },
