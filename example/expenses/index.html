@@ -1,8 +1,20 @@
-<html><head>
-
+<ul id="balances">(calculating...)</ul>
+(see source code for details)
 <script src="../../build/latest/remoteStorage-debug.js"></script>
 <script src="../../src/modules/money-0.1.js"></script>
 <script>
+  function declaration(person, date, comment, euros) {
+    remoteStorage.money.addDeclaration(person, 'unhosted-project', comment, date, euros, 'EUR');
+  }
+  function bulkDeclaration(person, date, items) {
+    for(var i in items) {
+      declaration(person, date, i, items[i]);
+    }
+  }
+  function transfer(from, to, date, euros) {
+    remoteStorage.money.reportTransfer(from, to, date, euros, 'EUR');
+  }
+
   localStorage.clear();
   remoteStorage.loadModule('money', 'rw');
   bulkDeclaration('michiel', '2011/09/09', {
@@ -274,19 +286,9 @@
     return Math.floor(100*amount+0.5)/100;
   }
   var balances = remoteStorage.money.getBalances2('EUR');
+  var str = '';
   for(var i in balances) {
-   console.log(i+': '+itoa(roundOff(balances[i]))+' EUR');
+   str += '<li>'+i+': '+itoa(roundOff(balances[i]))+' EUR</li>';
   };
-  function declaration(person, date, comment, euros) {
-    remoteStorage.money.addDeclaration(person, 'unhosted-project', comment, date, euros, 'EUR');
-  }
-  function bulkDeclaration(person, date, items) {
-    for(var i in items) {
-      declaration(person, date, i, items[i]);
-    }
-  }
-  function transfer(from, to, date, euros) {
-    remoteStorage.money.reportTransfer(from, to, date, euros, 'EUR');
-  }
-</script></head><body>
-(see console log)
+  document.getElementById('balances').innerHTML=str;
+</script>
