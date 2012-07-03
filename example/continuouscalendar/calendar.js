@@ -75,8 +75,8 @@ function checkItem()
 {
 	if(this.value.length == 0)
 	{
-	  var item = document.getElementById(itemId);
-		remoteStorage.calendar.removeValueForItemId(this.id. item);
+	  var item = document.getElementById(this.id);
+		remoteStorage.calendar.removeValueForItemId(this.id, item);
 		this.parentNode.removeChild(this);
 	}
 }
