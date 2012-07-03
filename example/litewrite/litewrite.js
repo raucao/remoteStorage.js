@@ -35,8 +35,10 @@ notes.on('change', function(e) {
 });
 
 
-function show(id) {
-    $('editor').innerHTML = notes.getContent(id)
+function show() {
+    if (notes.getIds().indexOf(id) != -1) {
+      $('editor').innerHTML = notes.getContent(id)
+    }
 }
 
 function select() {
@@ -71,9 +73,7 @@ function check() {
     var hash = location.hash
     if (hash) {
         id = hash.slice(1)
-        if (id in notes.getIds()) {
-            show(id)
-        }
+        show()
     } else {
         create()
     }
