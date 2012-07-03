@@ -38,11 +38,23 @@ function nextItemId()
 	return 'item' + localStorage.nextId;
 }
 
-
+function lookupItemsForParentId(parentId, callback) {
+  var list = remoteStorage.calendar.getEventsForDay(parentId);
+  if(list.length) {
+    callback(list);
+  }
+}
 function storeValueForItemId(itemId) {
 	var item = document.getElementById(itemId);
-  remoteStorage.calendar.storeValueForItemId(itemId, item);
+  if(item) {
+    remoteStorage.calendar.addEvent(itemId, item.parentNode.id, item.value);
+  }
 }
+function removeValueForItemId(itemId) {
+	var item = document.getElementById(itemId);
+  remoteStorage.calendar.removeEvent(itemId, (item?item.parentNode.id:undefined));
+}
+
 
 var todayDate;
 var firstDate;
@@ -75,8 +87,7 @@ function checkItem()
 {
 	if(this.value.length == 0)
 	{
-	  var item = document.getElementById(this.id);
-		remoteStorage.calendar.removeValueForItemId(this.id, item);
+		removeValueForItemId(this.id);
 		this.parentNode.removeChild(this);
 	}
 }
@@ -101,7 +112,7 @@ document.onclick = function(e)
 
 	var item = generateItem(parentId, nextItemId());
 	recalculateHeight(item.id);
-	remoteStorage.calendar.storeValueForItemId(item.id, item);
+	storeValueForItemId(item.id);
 	item.focus();
 }
 
@@ -116,7 +127,7 @@ function generateDay(day, date)
 	day.id = idForDate(date);
 	day.innerHTML = '<span>' + date.getDate() + '</span>';
 
-	remoteStorage.calendar.lookupItemsForParentId(day.id, function(items)
+	lookupItemsForParentId(day.id, function(items)
 	{
 		for(var i in items)
 		{

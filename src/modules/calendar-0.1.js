@@ -13,12 +13,6 @@ remoteStorage.defineModule('calendar', function(privateBaseClient) {
     }
     return list;
   }
-  function lookupItemsForParentId(parentId, callback) {
-    var list = getEventsForDay(parentId);
-    if(list.length) {
-      callback(list);
-    }
-  }
   function addEvent(itemId, day, value) {
     localStorage[itemId] = value;
 
@@ -33,11 +27,6 @@ remoteStorage.defineModule('calendar', function(privateBaseClient) {
     if(!found) {
       parentIdsToItemIds.push(itemId);
       localStorage[day] = parentIdsToItemIds;
-    }
-  }
-  function storeValueForItemId(itemId, item) {
-    if(item) {
-      addEvent(itemId, item.parentNode.id, item.value);
     }
   }
   function removeEvent(itemId, day) {
@@ -56,15 +45,12 @@ remoteStorage.defineModule('calendar', function(privateBaseClient) {
       }
     } 
   }
-  function removeValueForItemId(itemId, item) {
-    removeEvent(itemId, (item?item.parentNode.id:undefined));
-  }
   return {
     version: '0.1',
     exports: {
-      lookupItemsForParentId : lookupItemsForParentId,
-      storeValueForItemId    : storeValueForItemId,
-      removeValueForItemId   : removeValueForItemId
+      getEventsForDay: getEventsForDay,
+      addEvent: addEvent,
+      removeEvent: removeEvent
     }
   }
 });
