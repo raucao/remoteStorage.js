@@ -29,25 +29,27 @@ remoteStorage.defineModule('documents', function(myBaseClient) {
     function getContents(id) {
       var obj = myBaseClient.getObject(listName+'/'+id);
       if(obj) {
-        return obj.content;
+        return obj.contents;
+      } else {
+        return '';
       }
     }
     function getTitle(id) {
       return getContents(id).slice(0, 50);
     }
-    function setContents(id, content) {
-      if(content == '') {
+    function setContents(id, contents) {
+      if(contents == '') {
         myBaseClient.remove(listName+'/'+id);
       } else {
         myBaseClient.storeObject('text', listName+'/'+id, {
-          content: content
+          contents: contents
         });
       }
     }
-    function add(content) {
+    function add(contents) {
       var id = getUuid();
       myBaseClient.storeObject('text', listName+'/'+id, {
-        content: content
+        contents: contents
       });
       return id;
     }
@@ -72,7 +74,7 @@ remoteStorage.defineModule('documents', function(myBaseClient) {
     dataHints: {
       "module": "documents can be text documents, or etherpad-lite documents or pdfs or whatever people consider a (text) document. But spreadsheets and diagrams probably not",
       "objectType text": "a human-readable plain-text document in utf-8. No html or markdown etc, they should have their own object types",
-      "string text#content": "the content of the text document",
+      "string text#contents": "the contents of the text document",
       
       "directory documents/notes/": "used by litewrite for quick notes",
       "item documents/notes/calendar": "used by docrastinate for the 'calendar' pane",
