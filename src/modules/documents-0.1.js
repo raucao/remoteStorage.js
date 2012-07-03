@@ -22,30 +22,20 @@ remoteStorage.defineModule('documents', function(myBaseClient) {
     return uuid;
   }
   function getPrivateList(listName) {
-    myBaseClient.connect(listName);
+    myBaseClient.sync(listName+'/');
     function getIds() {
-      var myHashmap= myBaseClient.get(listName+'/'), myArray=[];
-      for(var i in myHashmap) {
-        myArray.push(i);
-      }
-      return myArray;
+      return myBaseClient.getListing(listName+'/');
     }
-    function getContent(id) {
-      var valueStr = myBaseClient.get(listName+'/'+id);
-      if(valueStr) {
-        try {
-          var obj = JSON.parse(valueStr);
-          return obj.content;
-        } catch(e) {
-          fire('error', e);
-        }
+    function getContents(id) {
+      var obj = myBaseClient.getObject(listName+'/'+id);
+      if(obj) {
+        return obj.content;
       }
-      return '';
     }
     function getTitle(id) {
-      return getContent(id).slice(0, 50);
+      return getContents(id).slice(0, 50);
     }
-    function setContent(id, content) {
+    function setContents(id, content) {
       if(content == '') {
         myBaseClient.remove(listName+'/'+id);
       } else {
@@ -69,9 +59,9 @@ remoteStorage.defineModule('documents', function(myBaseClient) {
     }
     return {
       getIds        : getIds,
-      getContent    : getContent,
+      getContents    : getContents,
       getTitle      : getTitle,
-      setContent    : setContent,
+      setContents   : setContents,
       add           : add,
       on            : on
     };

@@ -46,7 +46,7 @@ function select() {
 }
 
 function create() {
-    $('editor').textContent = ''
+    $('editor').textContents = ''
     id = notes.add('')
     location.hash = '#'+ id
     select()
@@ -97,7 +97,7 @@ function highlightSelected(){
     var element = $('item_'+hash)
     if (element) {
         element.className += ' selected'
-        setTitle(element.textContent)
+        setTitle(element.textContents)
     }
 }
 
@@ -129,8 +129,8 @@ function formatting(){ // this needs to get incredibly optimized â€¦
 
 $('editor').onkeyup = $('editor').onpaste = function(e){
     var html = e.target.innerHTML
-    if (html != notes.getContent(id)) {
-        notes.setContent(id, e.target.textContent)
+    if (html != notes.getContents(id)) {
+        notes.setContents(id, e.target.textContents)
         updateList()
     }
     formatting();
