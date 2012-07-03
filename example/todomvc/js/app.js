@@ -78,10 +78,12 @@ function todoContentHandler( event ) {
 
   todoId = event.target.getAttribute( 'data-todo-id' );
   div = document.getElementById( 'li_'+todoId );
-  div.className = 'editing';
+  if(div) {//it is possible to double-click the delete X, in which case the div will not exist at this point
+    div.className = 'editing';
 
-  inputEditTodo = document.getElementById( 'input_' + todoId );
-  inputEditTodo.focus();
+    inputEditTodo = document.getElementById( 'input_' + todoId );
+    inputEditTodo.focus();
+  }
 }
 
 function checkboxChangeHandler( event ) {
