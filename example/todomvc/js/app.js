@@ -3,12 +3,6 @@ var todos,
 
 window.addEventListener( "load", windowLoadHandler, false );
 
-function Todo( title, completed ) {
-  this.id = getUuid();
-  this.title = title;
-  this.completed = completed;
-}
-
 function windowLoadHandler() {
   remoteStorage.displayWidget('remotestorage-connect');
   remoteStorage.loadModule('tasks', '0.1', 'rw');
@@ -127,25 +121,25 @@ function redrawTodosUI() {
     // create checkbox
     checkbox = document.createElement( 'input' );
     checkbox.className = 'toggle';
-    checkbox.setAttribute( 'data-todo-id', todo.id );
+    checkbox.setAttribute( 'data-todo-id', ids[i] );
     checkbox.type = 'checkbox';
     checkbox.addEventListener( 'change', checkboxChangeHandler );
 
     // create div text
     label = document.createElement( 'label' );
-    label.setAttribute( 'data-todo-id', todo.id );
+    label.setAttribute( 'data-todo-id', ids[i] );
     label.appendChild( document.createTextNode( todo.title ) );
 
     // create delete button
     deleteLink = document.createElement( 'button' );
     deleteLink.className = 'destroy';
-    deleteLink.setAttribute( 'data-todo-id', todo.id );
+    deleteLink.setAttribute( 'data-todo-id', ids[i] );
     deleteLink.addEventListener( 'click', spanDeleteClickHandler );
 
     // create divDisplay
     divDisplay = document.createElement( 'div' );
     divDisplay.className = 'view';
-    divDisplay.setAttribute( 'data-todo-id', todo.id );
+    divDisplay.setAttribute( 'data-todo-id', ids[i] );
     divDisplay.appendChild( checkbox );
     divDisplay.appendChild( label );
     divDisplay.appendChild( deleteLink );
@@ -153,7 +147,7 @@ function redrawTodosUI() {
 
     // create todo input
     inputEditTodo = document.createElement( 'input' );
-    inputEditTodo.id = 'input_' + todo.id;
+    inputEditTodo.id = 'input_' + ids[i];
     inputEditTodo.className = 'edit';
     inputEditTodo.value = todo.title;
     inputEditTodo.addEventListener( 'keypress', inputEditTodoKeyPressHandler );
@@ -161,7 +155,7 @@ function redrawTodosUI() {
 
     // create li
     li = document.createElement( 'li' );
-    li.id = 'li_' + todo.id;
+    li.id = 'li_' + ids[i];
     li.appendChild( divDisplay );
     li.appendChild( inputEditTodo );
 
