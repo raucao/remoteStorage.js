@@ -57,7 +57,7 @@ remoteStorage.defineModule('calendar', function(privateBaseClient) {
     } 
   }
   function removeValueForItemId(itemId, item) {
-    removeEvent(itemId, (item?item.parentId.id:undefined));
+    removeEvent(itemId, (item?item.parentNode.id:undefined));
   }
   return {
     version: '0.1',
