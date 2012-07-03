@@ -24,7 +24,7 @@ remoteStorage.defineModule('tasks', function(myPrivateBaseClient, myPublicBaseCl
   function getPrivateList(listName) {
     myPrivateBaseClient.sync(listName+'/');
     function getIds() {
-      return myPrivateBaseClient.getListing(listName+'/'), myArray=[];
+      return myPrivateBaseClient.getListing(listName+'/');
     }
     function get(id) {
       return myPrivateBaseClient.getObject(listName+'/'+id);

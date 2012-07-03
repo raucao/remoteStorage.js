@@ -86,11 +86,19 @@ define(['./sync', './store'], function (sync, store) {
           if(cb) {
             sync.fetchNow(absPath, function(err) {
               var node = store.getNode(absPath);
-              cb(node.data);
+              var arr = [];
+              for(var i in node.data) {
+                arr.push(i);
+              }
+              cb(arr);
             });
           } else {
             var node = store.getNode(absPath);
-            return node.data;
+              var arr = [];
+              for(var i in node.data) {
+                arr.push(i);
+              }
+            return arr;
           }
         },
         getMedia    : function(path, cb) {
@@ -118,7 +126,7 @@ define(['./sync', './store'], function (sync, store) {
         storeObject : function(type, path, obj) {
           obj['@type'] = 'https://remotestoragejs.com/spec/modules/'+type;
           //checkFields(obj);
-          return set(makePath(path), JSON.stringify(obj), 'application/json');
+          return set(makePath(path), obj, 'application/json');
         },
         storeMedia  : function(mimeType, path, data) {
           return set(makePath(path), data, mimeType);
