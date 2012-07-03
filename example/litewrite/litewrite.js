@@ -36,7 +36,7 @@ notes.on('change', function(e) {
 
 
 function show(id) {
-    $('editor').innerHTML = notes.getContents(id)
+    $('editor').innerHTML = notes.getContent(id)
 }
 
 function select() {
@@ -46,7 +46,7 @@ function select() {
 }
 
 function create() {
-    $('editor').textContents = ''
+    $('editor').textContent = ''
     id = notes.add('')
     location.hash = '#'+ id
     select()
@@ -97,7 +97,7 @@ function highlightSelected(){
     var element = $('item_'+hash)
     if (element) {
         element.className += ' selected'
-        setTitle(element.textContents)
+        setTitle(element.textContent)
     }
 }
 
@@ -129,8 +129,8 @@ function formatting(){ // this needs to get incredibly optimized â€¦
 
 $('editor').onkeyup = $('editor').onpaste = function(e){
     var html = e.target.innerHTML
-    if (html != notes.getContents(id)) {
-        notes.setContents(id, e.target.textContents)
+    if (html != notes.getContent(id)) {
+        notes.setContent(id, e.target.textContent)
         updateList()
     }
     formatting();
