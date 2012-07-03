@@ -30,78 +30,18 @@
 // TODO: small resizing problem when today box moves to the next day
 // TODO: need a way of exporting/importing data
 
+remoteStorage.loadModule('calendar', 'rw');
+
 function nextItemId()
 {
 	localStorage.nextId = localStorage.nextId ? parseInt(localStorage.nextId) + 1 : 0;
 	return 'item' + localStorage.nextId;
 }
 
-// callback expects a list of objects with the itemId and itemValue properties set
-function lookupItemsForParentId(parentId, callback)
-{
-	if(localStorage[parentId])
-	{
-		var parentIdsToItemIds = localStorage[parentId].split(',');
-		var list = [];
 
-		for(var i in parentIdsToItemIds)
-		{
-			var itemId = parentIdsToItemIds[i];
-			var itemValue = localStorage[itemId];
-			list.push({'itemId': itemId, 'itemValue': itemValue});
-		}
-
-		callback(list);
-	}
-}
-
-function storeValueForItemId(itemId)
-{
+function storeValueForItemId(itemId) {
 	var item = document.getElementById(itemId);
-	if(item)
-	{
-		var parentId = item.parentNode.id;
-		localStorage[itemId] = item.value;
-
-		var parentIdsToItemIds = localStorage[parentId] ? localStorage[parentId].split(',') : [];
-		var found = false;
-		for(var i in parentIdsToItemIds)
-		{
-			if(parentIdsToItemIds[i] == itemId)
-			{
-				found = true;
-				break;
-			}
-		}
-		if(!found)
-		{
-			parentIdsToItemIds.push(itemId);
-			localStorage[parentId] = parentIdsToItemIds;
-		}
-	}
-}
-
-function removeValueForItemId(itemId)
-{
-	delete localStorage[itemId];
-
-	var item = document.getElementById(itemId);
-	if(!item) return;
-	var parentId = item.parentNode.id;
-	if(localStorage[parentId])
-	{
-		var parentIdsToItemIds = localStorage[parentId].split(',');
-		for(var i in parentIdsToItemIds)
-		{
-			if(parentIdsToItemIds[i] == itemId)
-			{
-				parentIdsToItemIds = parentIdsToItemIds.slice(0, i).concat(parentIdsToItemIds.slice(i + 1));
-				if(parentIdsToItemIds.length) localStorage[parentId] = parentIdsToItemIds;
-				else delete localStorage[parentId];
-				break;
-			}
-		}
-	}
+  remoteStorage.calendar.storeValueForItemId(itemId, item);
 }
 
 var todayDate;
@@ -135,7 +75,8 @@ function checkItem()
 {
 	if(this.value.length == 0)
 	{
-		removeValueForItemId(this.id);
+	  var item = document.getElementById(itemId);
+		remoteStorage.calendar.removeValueForItemId(this.id. item);
 		this.parentNode.removeChild(this);
 	}
 }
@@ -160,7 +101,7 @@ document.onclick = function(e)
 
 	var item = generateItem(parentId, nextItemId());
 	recalculateHeight(item.id);
-	storeValueForItemId(item.id);
+	remoteStorage.calendar.storeValueForItemId(item.id, item);
 	item.focus();
 }
 
@@ -175,7 +116,7 @@ function generateDay(day, date)
 	day.id = idForDate(date);
 	day.innerHTML = '<span>' + date.getDate() + '</span>';
 
-	lookupItemsForParentId(day.id, function(items)
+	remoteStorage.calendar.lookupItemsForParentId(day.id, function(items)
 	{
 		for(var i in items)
 		{
