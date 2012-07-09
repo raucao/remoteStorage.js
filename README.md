@@ -1,5 +1,7 @@
 # remoteStorage.js
 
+*NOTE:* This is a legacy branch to use with old apps. It will remain being called "stable", until the v0.7 emerges to a useful state. If you wish to start a new app, please use the master branch.
+
 A library for adding remoteStorage support to your client-side app. See [the tutorial](http://tutorial.unhosted.5apps.com) for example usage and [download](https://github.com/unhosted/remoteStorage.js/raw/master/build/latest/remoteStorage.js) the library. To use, check out 'master'. To contribute, check out '0.7' (but come to #unhosted on freenode or email michiel at unhosted.org first, so we can coordinate).
 
 ## Code example
