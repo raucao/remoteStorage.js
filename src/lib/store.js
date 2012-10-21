@@ -205,8 +205,8 @@ define(['./util'], function (util) {
     }
   }
 
-  function removeNode(path) {
-    setNodeData(path, undefined, false);
+  function removeNode(path, timestamp) {
+    setNodeData(path, undefined, false, timestamp || getCurrTimestamp());
   }
 
   // Method: setNodeAccess

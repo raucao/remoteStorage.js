@@ -103,7 +103,16 @@ define(['./wireClient', './store', './util'], function(wireClient, store, util) 
   //   >   console.log("received object is: ", object);
   //   > });
   //
-  
+
+  function needsSync(path) {
+    var listing = store.getNodeData('/');
+    for(var key in listing) {
+      if(util.isDir(key) && Object.keys(store.getNode('/' + key).diff).length > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /**************************************/
 
@@ -417,7 +426,7 @@ define(['./wireClient', './store', './util'], function(wireClient, store, util) 
   function deleteLocal(path, local, remote) {
     logger.info('DELETE', path, 'REMOTE -> LOCAL');
     var oldValue = store.getNodeData(path);
-    store.removeNode(path);
+    store.removeNode(path, remote.timestamp);
   }
 
   // Function: deleteRemote
@@ -857,6 +866,8 @@ define(['./wireClient', './store', './util'], function(wireClient, store, util) 
         // outgoing update!
         if(newData) {
           local.data = newData;
+          // a hack to also update local data, when the resolution specifies new data
+          updateLocal(path, local, local);
         }
         updateRemote(path, local, remote);
       } else if(solution == 'remote') {
@@ -975,15 +986,17 @@ define(['./wireClient', './store', './util'], function(wireClient, store, util) 
     fullSync: limitedFullSync,
 
     forceSync: fullSync,
-    // Method: partialSync
-    // <partialSync>, limited to act at max once every 30 seconds per (path, depth) pair.
-    partialSync: limitedPartialSync,
     // Method: fullPush
     // <fullPush>
     fullPush: fullPush,
+    // Method: partialSync
+    // <partialSync>, limited to act at max once every 30 seconds per (path, depth) pair.
+    partialSync: limitedPartialSync,
     // Method: syncOne
     // <syncOne>
     syncOne: syncOne,
+
+    needsSync: needsSync,
 
     // Method: getState
     // <getState>
